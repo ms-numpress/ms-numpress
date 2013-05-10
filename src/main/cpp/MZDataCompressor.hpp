@@ -7,11 +7,23 @@
 #ifndef _MZDATACOMPRESSOR_HPP_
 #define _MZDATACOMPRESSOR_HPP_
 
+#include <stdlib.h>
+
 namespace ms {
 namespace numpress {
 
 class MZDataCompressor {
 	public:
+
+	static void encode_int(
+		int x,
+		unsigned char* res,
+		size_t *res_length);
+	
+	static void decode_int(
+		const unsigned char **bp,
+		int *half,
+		int *res);
 
 /**
  * Encodes the doubles in data by first using a 

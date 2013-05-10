@@ -15,7 +15,7 @@ namespace numpress {
  * res_length is incremented by the number of halfbytes, 
  * which will be 1 <= n <= 9
  */
-void encode_int(
+void MZDataCompressor::encode_int(
 		int x,
 		unsigned char* res,
 		size_t *res_length	
@@ -35,7 +35,7 @@ void encode_int(
 		}
 		res[0] = l;
 		for (i=l; i<8; i++) {
-			res[1+l-i] = x >> (4*(7-i));
+			res[1+i-l] = x >> (4*(i-l));
 		}
 		*res_length += 1+8-l;
 
@@ -50,7 +50,7 @@ void encode_int(
 		}
 		res[0] = l + 8;
 		for (i=l; i<8; i++) {
-			res[+1+l-i] = x >> (4*(7-i));
+			res[1+i-l] = x >> (4*(i-l));
 		}
 		*res_length += 1+8-l;
 
@@ -72,7 +72,7 @@ void MZDataCompressor::encode(
 		unsigned char *result, 
 		size_t *resultByteCount
 ) {
-	int ints[3];
+	unsigned int ints[3];
 	size_t i, j, ri;
 	unsigned char* init;
 	unsigned char halfBytes[10];
@@ -88,8 +88,9 @@ void MZDataCompressor::encode(
 
 	init = (unsigned char*)&ints[1];
 	
-	for (ri=0; ri<8; ri++) {
-		result[ri] = init[ri];
+	for (i=0; i<4; i++) {
+		result[0+i] = (init[1] >> (i*8)) & 0xff;
+		result[4+i] = (init[2] >> (i*8)) & 0xff;
 	}
 
 	halfByteCount = 0;
@@ -101,20 +102,10 @@ void MZDataCompressor::encode(
 		ints[2] = data[i] * 100000 + 0.5;
 		extrapol = ints[1] + (ints[1] - ints[0]);
 		diff = ints[2] - extrapol;
-		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
-		encode_int(diff, &halfBytes[halfByteCount], &halfByteCount);
-		/*
-		printf("%d (%d):  ", diff, (int)halfByteCount);
-		for (j=0; j<halfByteCount; j++) {
-			printf("%x ", halfBytes[j] & 0xf);
-		}
-		printf("\n");
-		*/
-		
+		MZDataCompressor::encode_int(diff, &halfBytes[halfByteCount], &halfByteCount);
 		
 		for (hbi=1; hbi < halfByteCount; hbi+=2) {
 			result[ri] = (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf);
-			//printf("%x \n", result[ri]);
 			ri++;
 		}
 		if (halfByteCount % 2 != 0) {
@@ -135,7 +126,7 @@ void MZDataCompressor::encode(
 /**
  * Decodes an int from the half bytes in bp. Lossless reverse of encode_int 
  */
-void decode_int(
+void MZDataCompressor::decode_int(
 		const unsigned char **bp,
 		int *half,
 		int *res
@@ -152,13 +143,13 @@ void decode_int(
 		head = (**bp) & 0xf;
 		(*bp)++;
 	}
+
+	*half = 1-(*half);
 	*res = 0;
-	
-	*half = 1- (*half);
 	
 	if (head <= 8) {
 		n = head;
-	} else {
+	} else { // leading ones, fill n half bytes in res
 		n = head - 8;
 		mask = 0xf0000000;
 		for (i=0; i<n; i++) {
@@ -171,14 +162,14 @@ void decode_int(
 		return;
 	}
 	
-	for (i=0; i<(8-n); i++) {
+	for (i=n; i<8; i++) {
 		if (*half == 0) {
 			hb = (**bp) >> 4;
 		} else {
 			hb = (**bp) & 0xf;
 			(*bp)++;
 		}
-		*res = *res | (hb << ((7-n)*4));
+		*res = *res | (hb << ((i-n)*4));
 		*half = 1 - (*half);
 	}
 }
@@ -192,7 +183,7 @@ void MZDataCompressor::decode(
 		size_t resultDoubleCount
 ) {
 	size_t i;
-	int *inits;
+	int init;
 	int ints[3];
 	double d;
 	const unsigned char *di;
@@ -200,26 +191,30 @@ void MZDataCompressor::decode(
 	int extrapol;
 	int y;
 
-	inits = (int*)&data[0];
-	result[0] = (d = inits[0]) / 100000;
-	result[1] = (d = inits[1]) / 100000;
-	
-	ints[1] = inits[0];
-	ints[2] = inits[1];
-	
+	ints[1] = 0;
+	ints[2] = 0;
+
+	for (i=0; i<4; i++) {
+		ints[1] = ints[1] | ((0xff & (init = data[i])) << (i*8));
+		ints[2] = ints[2] | ((0xff & (init = data[4+i])) << (i*8));
+	}
+
+	result[0] = ints[1] / 100000.0;
+	result[1] = ints[2] / 100000.0;
+		
 	di = &data[8];
 	half = 0;
 	
 	for (i=2; i<resultDoubleCount; i++) {
 		ints[0] = ints[1];
 		ints[1] = ints[2];
-		decode_int(&di, &half, &ints[2]);
+		MZDataCompressor::decode_int(&di, &half, &ints[2]);
 		
 		extrapol = ints[1] + (ints[1] - ints[0]);
 		y = extrapol + ints[2];
 		printf("%d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], extrapol, ints[2]);
-		result[i] = (d = y) / 100000;
-		ints[2] = y;
+		result[i] 	= y / 100000.0;
+		ints[2] 	= y;
 	}
 }
 
