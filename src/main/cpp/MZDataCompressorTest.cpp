@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <assert.h>
+#include <vector>
 
 using ms::numpress::MZDataCompressor;
 
@@ -48,7 +49,8 @@ void testEncodeInt() {
 
 
 void testDecodeInt() {
-	unsigned char bytes[10];
+	std::vector<unsigned char> bytes;
+	bytes.resize(10);
 	bytes[0] = (unsigned char)0x75;
 	bytes[1] = (unsigned char)0x87;
 	bytes[2] = (unsigned char)0x11;
@@ -57,20 +59,20 @@ void testDecodeInt() {
 	bytes[5] = (unsigned char)0x5f;
 	bytes[6] = (unsigned char)0x50;
 	
-	const unsigned char *bp = &bytes[0];
+	size_t bi = 0;
 	int half = 0;
 	int res = 0;
 	
-	MZDataCompressor::decode_int(&bp, &half, &res);
+	MZDataCompressor::decode_int(bytes, &bi, &half, &res);
 	assert(5 == res);
 	
-	MZDataCompressor::decode_int(&bp, &half, &res);
+	MZDataCompressor::decode_int(bytes, &bi, &half, &res);
 	assert(0 == res);
-	
-	MZDataCompressor::decode_int(&bp, &half, &res);
+		
+	MZDataCompressor::decode_int(bytes, &bi, &half, &res);
 	assert(1 == res);
 	
-	MZDataCompressor::decode_int(&bp, &half, &res);
+	MZDataCompressor::decode_int(bytes, &bi,  &half, &res);
 	assert(100000000 == res);
 }
 	

@@ -8,6 +8,7 @@
 #define _MZDATACOMPRESSOR_HPP_
 
 #include <stdlib.h>
+#include <vector>
 
 namespace ms {
 namespace numpress {
@@ -21,7 +22,8 @@ class MZDataCompressor {
 		size_t *res_length);
 	
 	static void decode_int(
-		const unsigned char **bp,
+		const std::vector<unsigned char> &data,
+		size_t *di,
 		int *half,
 		int *res);
 
@@ -42,18 +44,18 @@ class MZDataCompressor {
 
 /**
  * Decodes data encoded by encode. Note that the compression 
- * discard any information < 10^-5, so data is only guaranteed 
- * to be within +- 0.5*10^-5 of the original value.
+ * discard any information < 1e-5, so data is only guaranteed 
+ * to be within +- 5e-6 of the original value.
  *
  * Further, values > ~42000 will also be truncated because of the
  * fixed point repressentation, so this scheme is stronly discouraged 
  * if values above might be above this size.
+ *
+ * result vector guaranteedly shorter than twice the data length (in nbr of values)
  */
 	static void decode(
-		const unsigned char *dat, 
-		size_t dataSize, 
-		double *result, 
-		size_t resultDoubleCount);
+		const std::vector<unsigned char> &data,
+		std::vector<double> &result);
 };
 
 } // namespace numpress

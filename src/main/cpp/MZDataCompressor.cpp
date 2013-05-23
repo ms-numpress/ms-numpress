@@ -5,11 +5,19 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdexcept>
+#include <vector>
+#include <iostream>
+#include <cmath>
 #include "MZDataCompressor.hpp"
 
 namespace ms {
 namespace numpress {
 
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::min;
 /**
  * Encodes the int x as a number of halfbytes in res. 
  * res_length is incremented by the number of halfbytes, 
@@ -74,7 +82,6 @@ void MZDataCompressor::encode(
 ) {
 	unsigned int ints[3];
 	size_t i, j, ri;
-	unsigned char* init;
 	unsigned char halfBytes[10];
 	size_t halfByteCount;
 	size_t hbi;
@@ -85,12 +92,10 @@ void MZDataCompressor::encode(
 
 	ints[1] = data[0] * 100000 + 0.5;
 	ints[2] = data[1] * 100000 + 0.5;
-
-	init = (unsigned char*)&ints[1];
 	
 	for (i=0; i<4; i++) {
-		result[0+i] = (init[1] >> (i*8)) & 0xff;
-		result[4+i] = (init[2] >> (i*8)) & 0xff;
+		result[0+i] = (ints[1] >> (i*8)) & 0xff;
+		result[4+i] = (ints[2] >> (i*8)) & 0xff;
 	}
 
 	halfByteCount = 0;
@@ -127,7 +132,8 @@ void MZDataCompressor::encode(
  * Decodes an int from the half bytes in bp. Lossless reverse of encode_int 
  */
 void MZDataCompressor::decode_int(
-		const unsigned char **bp,
+		const std::vector<unsigned char> &data,
+		size_t *di,
 		int *half,
 		int *res
 ) {
@@ -138,10 +144,10 @@ void MZDataCompressor::decode_int(
 	unsigned char hb;
 
 	if (*half == 0) {
-		head = (**bp) >> 4;
+		head = data[*di] >> 4;
 	} else {
-		head = (**bp) & 0xf;
-		(*bp)++;
+		head = data[*di] & 0xf;
+		(*di)++;
 	}
 
 	*half = 1-(*half);
@@ -164,10 +170,10 @@ void MZDataCompressor::decode_int(
 	
 	for (i=n; i<8; i++) {
 		if (*half == 0) {
-			hb = (**bp) >> 4;
+			hb = data[*di] >> 4;
 		} else {
-			hb = (**bp) & 0xf;
-			(*bp)++;
+			hb = data[*di] & 0xf;
+			(*di)++;
 		}
 		*res = *res | (hb << ((i-n)*4));
 		*half = 1 - (*half);
@@ -177,44 +183,69 @@ void MZDataCompressor::decode_int(
 
 
 void MZDataCompressor::decode(
-		const unsigned char *data, 
-		size_t dataSize, 
-		double *result, 
-		size_t resultDoubleCount
+		const std::vector<unsigned char> &data,  
+		std::vector<double> &result
 ) {
 	size_t i;
+	size_t ri;
 	int init;
 	int ints[3];
-	double d;
-	const unsigned char *di;
+	//double d;
+	size_t di;
+	size_t dataSize = data.size();
 	int half;
 	int extrapol;
 	int y;
 
-	ints[1] = 0;
-	ints[2] = 0;
+	try {
+		ints[1] = 0;
+		ints[2] = 0;
 
-	for (i=0; i<4; i++) {
-		ints[1] = ints[1] | ((0xff & (init = data[i])) << (i*8));
-		ints[2] = ints[2] | ((0xff & (init = data[4+i])) << (i*8));
-	}
+		for (i=0; i<4; i++) {
+			ints[1] = ints[1] | ((0xff & (init = data[i])) << (i*8));
+			ints[2] = ints[2] | ((0xff & (init = data[4+i])) << (i*8));
+		}
 
-	result[0] = ints[1] / 100000.0;
-	result[1] = ints[2] / 100000.0;
+		result[0] = ints[1] / 100000.0;
+		result[1] = ints[2] / 100000.0;
+			
+		half = 0;
+		ri = 2;
+		di = 8;
 		
-	di = &data[8];
-	half = 0;
-	
-	for (i=2; i<resultDoubleCount; i++) {
-		ints[0] = ints[1];
-		ints[1] = ints[2];
-		MZDataCompressor::decode_int(&di, &half, &ints[2]);
-		
-		extrapol = ints[1] + (ints[1] - ints[0]);
-		y = extrapol + ints[2];
-		printf("%d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], extrapol, ints[2]);
-		result[i] 	= y / 100000.0;
-		ints[2] 	= y;
+		while (di < dataSize) {
+			ints[0] = ints[1];
+			ints[1] = ints[2];
+			if (di == (dataSize - 1) && half == 1) {
+				if ((data[di] & 0xf) != 0x8) {
+					break;
+				}
+			}
+			ms::numpress::MZDataCompressor::decode_int(data, &di, &half, &ints[2]);
+			
+			extrapol = ints[1] + (ints[1] - ints[0]);
+			y = extrapol + ints[2];
+			//printf("%d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], extrapol, ints[2]);
+			result[ri++] 	= y / 100000.0;
+			ints[2] 		= y;
+		}
+		result.resize(ri);
+	} catch (...) {
+		cerr << "DECODE ERROR" << endl;
+		cerr << "i: " << i << endl;
+		cerr << "ri: " << ri << endl;
+		cerr << "resultSize: " << result.size() << endl;
+		cerr << "di: " << di << endl;
+		cerr << "half: " << half << endl;
+		cerr << "dataSize: " << dataSize << endl;
+		cerr << "ints[]: " << ints[0] << ", " << ints[1] << ", " << ints[2] << endl;
+		cerr << "extrapol: " << extrapol << endl;
+		cerr << "y: " << y << endl;
+
+		for (i = di - 3; i < min(di + 3, dataSize); i++) {
+			cerr << "data[" << i << "] = " << data[i];
+		}
+		cerr << endl;
 	}
 }
 
