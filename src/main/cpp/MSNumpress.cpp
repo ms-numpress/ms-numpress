@@ -160,12 +160,12 @@ void MSNumpress::encodeCount(
 		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
 		encodeInt(count, &halfBytes[halfByteCount], &halfByteCount);
 		/*
-		*/
 		printf("%d (%d):  ", count, (int)halfByteCount);
 		for (j=0; j<halfByteCount; j++) {
 			printf("%x ", halfBytes[j] & 0xf);
 		}
 		printf("\n");
+		*/
 		
 		for (hbi=1; hbi < halfByteCount; hbi+=2) {
 			result[ri] = (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf);
@@ -330,7 +330,7 @@ void MSNumpress::decodeCount(
 			}
 			decodeInt(data, &di, &half, &count);
 			
-			printf("count: %d \n", count);
+			//printf("count: %d \n", count);
 			result[ri++] 	= count;
 		}
 		result.resize(ri);
