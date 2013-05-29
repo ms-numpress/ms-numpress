@@ -1,5 +1,5 @@
 //
-// MZDataCompressor.cpp
+// MSNumpress.cpp
 // johan.teleman@immun.lth.se
 //
 
@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include "MZDataCompressor.hpp"
+#include "MSNumpress.hpp"
 
 namespace ms {
 namespace numpress {
@@ -18,12 +18,14 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using std::min;
+
+
 /**
  * Encodes the int x as a number of halfbytes in res. 
  * res_length is incremented by the number of halfbytes, 
  * which will be 1 <= n <= 9
  */
-void MZDataCompressor::encode_int(
+void encodeInt(
 		int x,
 		unsigned char* res,
 		size_t *res_length	
@@ -72,16 +74,14 @@ void MZDataCompressor::encode_int(
 	}
 }
 
-
-
-void MZDataCompressor::encode(
+void MSNumpress::encodeLinear(
 		const double *data, 
 		size_t dataSize, 
 		unsigned char *result, 
 		size_t *resultByteCount
 ) {
 	unsigned int ints[3];
-	size_t i, j, ri;
+	size_t i, ri;
 	unsigned char halfBytes[10];
 	size_t halfByteCount;
 	size_t hbi;
@@ -107,10 +107,69 @@ void MZDataCompressor::encode(
 		ints[2] = data[i] * 100000 + 0.5;
 		extrapol = ints[1] + (ints[1] - ints[0]);
 		diff = ints[2] - extrapol;
-		MZDataCompressor::encode_int(diff, &halfBytes[halfByteCount], &halfByteCount);
+		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
+		encodeInt(diff, &halfBytes[halfByteCount], &halfByteCount);
+		/*
+		printf("%d (%d):  ", diff, (int)halfByteCount);
+		for (j=0; j<halfByteCount; j++) {
+			printf("%x ", halfBytes[j] & 0xf);
+		}
+		printf("\n");
+		*/
+		
 		
 		for (hbi=1; hbi < halfByteCount; hbi+=2) {
 			result[ri] = (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf);
+			//printf("%x \n", result[ri]);
+			ri++;
+		}
+		if (halfByteCount % 2 != 0) {
+			halfBytes[0] = halfBytes[halfByteCount-1];
+			halfByteCount = 1;
+		} else {
+			halfByteCount = 0;
+		}
+	}
+	if (halfByteCount == 1) {
+		result[ri] = halfBytes[0] << 4;
+		ri++;
+	}
+	*resultByteCount = ri;
+}
+
+
+
+void MSNumpress::encodeCount(
+		const double *data, 
+		size_t dataSize, 
+		unsigned char *result, 
+		size_t *resultByteCount
+) {
+	size_t i, ri, count, j;
+	unsigned char halfBytes[10];
+	size_t halfByteCount;
+	size_t hbi;
+
+	//printf("Encoding %d doubles\n", (int)dataSize);
+
+	halfByteCount = 0;
+	ri = 0;
+
+	for (i=0; i<dataSize; i++) {
+		count = data[i] + 0.5;
+		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
+		encodeInt(count, &halfBytes[halfByteCount], &halfByteCount);
+		/*
+		*/
+		printf("%d (%d):  ", count, (int)halfByteCount);
+		for (j=0; j<halfByteCount; j++) {
+			printf("%x ", halfBytes[j] & 0xf);
+		}
+		printf("\n");
+		
+		for (hbi=1; hbi < halfByteCount; hbi+=2) {
+			result[ri] = (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf);
+			//printf("%x \n", result[ri]);
 			ri++;
 		}
 		if (halfByteCount % 2 != 0) {
@@ -131,7 +190,7 @@ void MZDataCompressor::encode(
 /**
  * Decodes an int from the half bytes in bp. Lossless reverse of encode_int 
  */
-void MZDataCompressor::decode_int(
+void decodeInt(
 		const std::vector<unsigned char> &data,
 		size_t *di,
 		int *half,
@@ -180,10 +239,8 @@ void MZDataCompressor::decode_int(
 	}
 }
 
-
-
-void MZDataCompressor::decode(
-		const std::vector<unsigned char> &data,  
+void MSNumpress::decodeLinear(
+		std::vector<unsigned char> &data,  
 		std::vector<double> &result
 ) {
 	size_t i;
@@ -221,7 +278,7 @@ void MZDataCompressor::decode(
 					break;
 				}
 			}
-			ms::numpress::MZDataCompressor::decode_int(data, &di, &half, &ints[2]);
+			decodeInt(data, &di, &half, &ints[2]);
 			
 			extrapol = ints[1] + (ints[1] - ints[0]);
 			y = extrapol + ints[2];
@@ -248,6 +305,93 @@ void MZDataCompressor::decode(
 		cerr << endl;
 	}
 }
+
+void MSNumpress::decodeCount(
+		std::vector<unsigned char> &data,  
+		std::vector<double> &result
+) {
+	size_t i, ri;
+	int count;
+	//double d;
+	size_t di;
+	size_t dataSize = data.size();
+	int half;
+
+	try {
+		half = 0;
+		ri = 0;
+		di = 0;
+		
+		while (di < dataSize) {
+			if (di == (dataSize - 1) && half == 1) {
+				if ((data[di] & 0xf) != 0x8) {
+					break;
+				}
+			}
+			decodeInt(data, &di, &half, &count);
+			
+			printf("count: %d \n", count);
+			result[ri++] 	= count;
+		}
+		result.resize(ri);
+	} catch (...) {
+		cerr << "DECODE ERROR" << endl;
+		cerr << "ri: " << ri << endl;
+		cerr << "resultSize: " << result.size() << endl;
+		cerr << "di: " << di << endl;
+		cerr << "half: " << half << endl;
+		cerr << "dataSize: " << dataSize << endl;
+		cerr << "count: " << count << endl;
+
+		for (i = di - 3; i < min(di + 3, dataSize); i++) {
+			cerr << "data[" << i << "] = " << data[i];
+		}
+		cerr << endl;
+	}
+}
+
+
+
+
+double TWO_BYTE_FLOAT_FIXED_POINT = 3000.0;
+void MSNumpress::encode2ByteFloat(
+		const double *data, 
+		size_t dataSize, 
+		unsigned char *result, 
+		size_t *resultByteCount
+) {
+	size_t i, ri;
+	unsigned short fp;
+	ri = 0;
+
+	for (i=0; i<dataSize; i++) {
+		fp = log(data[i]) * TWO_BYTE_FLOAT_FIXED_POINT + 0.5;
+		
+		result[ri++] = fp & 0xff;
+		result[ri++] = fp >> 8;
+	}
+	*resultByteCount = ri;
+}
+
+
+
+void MSNumpress::decode2ByteFloat(
+		std::vector<unsigned char> &data,  
+		std::vector<double> &result
+) {
+	size_t i, ri;
+	size_t dataSize = data.size();
+	unsigned short fp;
+	ri = 0;
+
+	result.resize(dataSize / 2);
+	
+	for (i=0; i<dataSize; i+=2) {
+		fp = data[i] | (data[i+1] << 8);
+		result[ri++] = exp(fp / TWO_BYTE_FLOAT_FIXED_POINT);
+	}
+}
+
 
 } // namespace numpress
 } // namespace ms
