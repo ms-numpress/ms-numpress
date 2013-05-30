@@ -2,7 +2,24 @@
 // MSNumpress.hpp
 // johan.teleman@immun.lth.se
 //
-
+// Some of the encodings described below use a integer compression refered to simply as 
+//
+// 	encodeInt()
+// 
+// This encoding works on a 4 byte integer, by truncating initial zeros or ones.
+// If the initial (most significant) half byte is 0x0 or 0xf, the number of such 
+// halfbytes starting from the most significant is stored in a halfbyte. This initial 
+// count is then followed by the rest of the ints halfbytes, in little-endian order. 
+// A count halfbyte c of
+// 
+// 	0 <= c <= 8 		is interpreted as an initial c 		0x0 halfbytes 
+// 	9 <= c <= 15		is interpreted as an initial (c-8) 	0xf halfbytes
+//
+// Ex:
+// int		c		rest
+// 0 	=> 	0x8
+// -1	=>	0xf		0xf
+// 23	=>	0x6 	0x7	0x1
 
 #ifndef _MSNUMPRESS_HPP_
 #define _MSNUMPRESS_HPP_
