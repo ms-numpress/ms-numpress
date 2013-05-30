@@ -1,7 +1,7 @@
 package ms.numpress;
 
 /**
- * Decodes ints from the half bytes in bytes. Lossless reverse of encode_int 
+ * Decodes ints from the half bytes in bytes. Lossless reverse of encodeInt 
  */
 class IntDecoder {
 	
@@ -21,20 +21,17 @@ class IntDecoder {
 		long mask, m;
 		int hb;
 		
-		if (!half) {
+		if (!half)
 			head = (0xff & bytes[pos]) >> 4;
-		} else {
-			head = 0x0f & bytes[pos];
-			pos++;
-		}
-		//System.out.println("half: "+half+"  head: "+head);
-		
+		else
+			head = 0xf & bytes[pos++];
+
 		half = !half;
 		
-		
-		if (head <= 8) {
+		if (head <= 8)
 			n = head;
-		} else { // leading ones, fill in res
+		else { 
+			// leading ones, fill in res
 			n = head - 8;
 			mask = 0xf0000000;
 			for (i=0; i<n; i++) {
@@ -46,12 +43,11 @@ class IntDecoder {
 		if (n == 8) return 0;
 			
 		for (i=n; i<8; i++) {
-			if (!half) {
+			if (!half)
 				hb = (0xff & bytes[pos]) >> 4;
-			} else {
-				hb = 0x0f & bytes[pos];
-				pos++;
-			}
+			else
+				hb = 0xf & bytes[pos++];
+
 			res = res | (hb << ((i-n)*4));
 			half = !half;
 		}
