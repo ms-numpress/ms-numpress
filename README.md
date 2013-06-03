@@ -63,6 +63,7 @@ A count halfbyte c of
 	9 <= c <= 15		is interpreted as an initial (c-8) 	0xf halfbytes
 
 Examples:
+
 	int		c		rest
 	0 	=> 	0x8
 	-1	=>	0xf		0xf
