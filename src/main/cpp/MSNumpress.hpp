@@ -41,6 +41,7 @@
 #ifndef _MSNUMPRESS_HPP_
 #define _MSNUMPRESS_HPP_
 
+#include <cstddef>
 #include <vector>
 
 namespace ms {
@@ -117,20 +118,51 @@ namespace MSNumpress {
 	 * The handleable range is therefore 0 -> 4294967294.
 	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
 	 * data is close to 0 on average.
+	 *
+	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
+	 * @dataSize	number of doubles from *data to encode
+	 * @result		pointer to were resulting bytes should be stored
+	 * @return		the number of encoded bytes
 	 */
 	size_t encodeCount(
 		const double *data, 
 		const size_t dataSize, 
 		unsigned char *result);
+		
+	/**
+	 * Calls lower level encodeCount while handling vector sizes appropriately
+	 *
+	 * @data		vector of doubles to be encoded
+	 * @result		vector of resulting bytes (will be resized to the number of bytes)
+	 */
+	void encodeCount(
+		const std::vector<double> &data,
+		std::vector<unsigned char> &result);
 
 	/**
 	 * Decodes data encoded by encodeCount
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
+	 *
+	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
+	 * @dataSize	number of bytes from *data to decode
+	 * @result		pointer to were resulting doubles should be stored
+	 * @return		the number of decoded doubles
 	 */
 	void decodeCount(
-		std::vector<unsigned char> &data,
+		const std::vector<unsigned char> &data,
 		std::vector<double> &result);
+	
+	/**
+	 * Calls lower level decodeCount while handling vector sizes appropriately
+	 *
+	 * @data		vector of bytes to be decoded
+	 * @result		vector of resulting double (will be resized to the number of doubles)
+	 */
+	size_t decodeCount(
+		const unsigned char *data,
+		const size_t dataSize,
+		double *result);
 
 	/**
 	 * Encodes ion counts by taking the natural logarithm, and storing a
@@ -139,17 +171,48 @@ namespace MSNumpress {
 	 * unsigned short fp = log(d) * 3000.0 + 0.5
 	 *
 	 * result vector is exactly twice the data length (in nbr of values)
+	 *
+	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
+	 * @dataSize	number of doubles from *data to encode
+	 * @result		pointer to were resulting bytes should be stored
+	 * @return		the number of encoded bytes
 	 */
 	size_t encode2ByteFloat(
 		const double *data, 
 		const size_t dataSize, 
 		unsigned char *result);
+		
+	/**
+	 * Calls lower level encode2ByteFloat while handling vector sizes appropriately
+	 *
+	 * @data		vector of doubles to be encoded
+	 * @result		vector of resulting bytes (will be resized to the number of bytes)
+	 */
+	void encode2ByteFloat(
+		const std::vector<double> &data,
+		std::vector<unsigned char> &result);
 
 	/**
 	 * Decodes data encoded by encode2ByteFloat
+	 *
+	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
+	 * @dataSize	number of bytes from *data to decode
+	 * @result		pointer to were resulting doubles should be stored
+	 * @return		the number of decoded doubles
+	 */
+	size_t decode2ByteFloat(
+		const unsigned char *data, 
+		const size_t dataSize, 
+		double *result);
+	
+	/**
+	 * Calls lower level decode2ByteFloat while handling vector sizes appropriately
+	 *
+	 * @data		vector of bytes to be decoded
+	 * @result		vector of resulting double (will be resized to the number of doubles)
 	 */
 	void decode2ByteFloat(
-		std::vector<unsigned char> &data,
+		const std::vector<unsigned char> &data,
 		std::vector<double> &result);
 
 } // namespace MSNumpress

@@ -97,7 +97,7 @@ void encodeInt(
  * Decodes an int from the half bytes in bp. Lossless reverse of encodeInt 
  */
 void decodeInt(
-		const std::vector<unsigned char> &data,
+		const unsigned char *data,
 		size_t *di,
 		int *half,
 		int *res
@@ -265,7 +265,6 @@ size_t decodeLinear(
 		cerr << "DECODE ERROR" << endl;
 		cerr << "i: " << i << endl;
 		cerr << "ri: " << ri << endl;
-		cerr << "resultSize: " << result.size() << endl;
 		cerr << "di: " << di << endl;
 		cerr << "half: " << half << endl;
 		cerr << "dataSize: " << dataSize << endl;
@@ -355,15 +354,15 @@ size_t encodeCount(
 
 
 
-void decodeCount(
-		std::vector<unsigned char> &data,  
-		std::vector<double> &result
+size_t decodeCount(
+		const unsigned char *data,
+		const size_t dataSize,
+		double *result
 ) {
 	size_t i, ri;
 	int count;
 	//double d;
 	size_t di;
-	size_t dataSize = data.size();
 	int half;
 
 	try {
@@ -377,16 +376,14 @@ void decodeCount(
 					break;
 				}
 			}
-			decodeInt(data, &di, &half, &count);
+			decodeInt(&data[0], &di, &half, &count);
 			
 			//printf("count: %d \n", count);
 			result[ri++] 	= count;
 		}
-		result.resize(ri);
 	} catch (...) {
 		cerr << "DECODE ERROR" << endl;
 		cerr << "ri: " << ri << endl;
-		cerr << "resultSize: " << result.size() << endl;
 		cerr << "di: " << di << endl;
 		cerr << "half: " << half << endl;
 		cerr << "dataSize: " << dataSize << endl;
@@ -397,9 +394,31 @@ void decodeCount(
 		}
 		cerr << endl;
 	}
+	return ri;
 }
 
 
+void encodeCount(
+		const std::vector<double> &data,  
+		std::vector<unsigned char> &result
+) {
+	size_t dataSize = data.size();
+	result.resize(dataSize * 5);
+	size_t encodedLength = encodeCount(&data[0], dataSize, &result[0]);
+	result.resize(encodedLength);
+}
+
+
+
+void decodeCount(
+		const std::vector<unsigned char> &data,  
+		std::vector<double> &result
+) {
+	size_t dataSize = data.size();
+	result.resize(dataSize * 2);
+	size_t decodedLength = decodeCount(&data[0], dataSize, &result[0]);
+	result.resize(decodedLength);
+}
 
 /////////////////////////////////////////////////////////////
 
@@ -423,21 +442,42 @@ size_t encode2ByteFloat(
 
 
 
-void decode2ByteFloat(
-		std::vector<unsigned char> &data,  
-		std::vector<double> &result
+size_t decode2ByteFloat(
+		const unsigned char *data, 
+		const size_t dataSize, 
+		double *result
 ) {
 	size_t i, ri;
-	size_t dataSize = data.size();
 	unsigned short fp;
 	ri = 0;
 
-	result.resize(dataSize / 2);
-	
 	for (i=0; i<dataSize; i+=2) {
 		fp = data[i] | (data[i+1] << 8);
 		result[ri++] = exp(fp / ENC_TWO_BYTE_FIXED_POINT);
 	}
+	return ri;
+}
+
+void encode2ByteFloat(
+		const std::vector<double> &data,  
+		std::vector<unsigned char> &result
+) {
+	size_t dataSize = data.size();
+	result.resize(dataSize * 2);
+	size_t encodedLength = encode2ByteFloat(&data[0], dataSize, &result[0]);
+	result.resize(encodedLength);
+}
+
+
+
+void decode2ByteFloat(
+		const std::vector<unsigned char> &data,  
+		std::vector<double> &result
+) {
+	size_t dataSize = data.size();
+	result.resize(dataSize / 2);
+	size_t decodedLength = decode2ByteFloat(&data[0], dataSize, &result[0]);
+	result.resize(decodedLength);
 }
 
 }
