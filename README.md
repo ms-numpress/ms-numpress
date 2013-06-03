@@ -8,7 +8,7 @@ The library provides implementations of 3 different algorithms,
 time or M/Z arrays, and 2 for compressing non smooth data with
 lower requirements on precision like ion count arrays.
 
-Implementations and unit test are provided in c++ and java.
+Implementations and unit test are provided in `c++` and `java`.
 
 Numpress Pic
 ------------
@@ -43,10 +43,10 @@ The first to values are stored without compression as 4 byte integers.
 For each following value a linear predicion is made from the two previous
 values:
 
-	Xpred = (X(n) - X(n-1)) + X(n)
-	Xres = Xpred - X(n+1)
+	Xpred 	= (X(n) - X(n-1)) + X(n)
+	Xres 	= Xpred - X(n+1)
 
-The residual Xres is then stored, using the same truncated integer repressentation 
+The residual `Xres` is then stored, using the same truncated integer repressentation 
 as in Numpress Pic.  
 
 
