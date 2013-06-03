@@ -1,3 +1,6 @@
+MS Numpress
+===========
+
 Implementations of two compression schemes for numeric data from mass spectrometers.
 
 The library provides implementations of 3 different algorithms, 
@@ -8,14 +11,16 @@ lower requirements on precision like ion count arrays.
 Implementations and unit test are provided in c++ and java.
 
 
-@@@ MS Numpress positive integer compression - Numpress Pic @@@
+MS Numpress positive integer compression - Numpress Pic 
+-------------------------------------------------------
 
 Intended for ion count data, this compression simply rounds values 
 to the nearest integer, and stores these integers in a truncated 
 form which is effective for values relatively close to zero. 
 
 
-@@@ MS Numpress short logged float compression - Numpress Slof @@@
+MS Numpress short logged float compression - Numpress Slof 
+----------------------------------------------------------
 
 Also targeting ion count data, this compression takes the natural
 logarithm of values, multiplies by 3000 and rounds to the nearest 
@@ -24,7 +29,8 @@ a two byte integer, so only the two least significant bytes of the
 integer are stored.
 
 
-@@@ MS Numpress linear prediction compression - Numpress Lin @@@
+MS Numpress linear prediction compression - Numpress Lin 
+--------------------------------------------------------
 
 This compression uses a fixed point repressentation, achieve by 
 multiplication by 100000 and rounding to the nearest integer. To 
@@ -45,7 +51,8 @@ is then stored, using the same truncated integer repressentation
 as in Numpress Pic.  
 
 
-@@@ Truncated integer repressentation @@@
+Truncated integer repressentation 
+---------------------------------
 
 This encoding works on a 4 byte integer, by truncating initial zeros or ones.
 If the initial (most significant) half byte is 0x0 or 0xf, the number of such 
@@ -64,6 +71,7 @@ int		c		rest
 
 
 
-@@@ License @@@
+License 
+-------
 
 This code is open source, under the Apache 2.0 license.
