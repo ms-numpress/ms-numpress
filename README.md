@@ -41,13 +41,10 @@ The first to values are stored without compression as 4 byte integers.
 For each following value a linear predicion is made from the two previous
 values:
 
-Xpred = (X(n) - X(n-1)) + X(n)
+`Xpred = (X(n) - X(n-1)) + X(n)`
+`Xres = Xpred - X(n+1)`
 
-The residual
-
-Xres = Xpred - X(n+1)
-
-is then stored, using the same truncated integer repressentation 
+The residual Xres is then stored, using the same truncated integer repressentation 
 as in Numpress Pic.  
 
 
@@ -60,14 +57,14 @@ halfbytes starting from the most significant is stored in a halfbyte. This initi
 count is then followed by the rest of the ints halfbytes, in little-endian order. 
 A count halfbyte c of
 
-	0 <= c <= 8 		is interpreted as an initial c 		0x0 halfbytes 
-	9 <= c <= 15		is interpreted as an initial (c-8) 	0xf halfbytes
+	`0 <= c <= 8 		is interpreted as an initial c 		0x0 halfbytes`
+	`9 <= c <= 15		is interpreted as an initial (c-8) 	0xf halfbytes`
 
 Examples:
-int		c		rest
-0 	=> 	0x8
--1	=>	0xf		0xf
-23	=>	0x6 	0x7	0x1
+`int		c		rest`
+`0 	=> 	0x8`
+`-1	=>	0xf		0xf`
+`23	=>	0x6 	0x7	0x1`
 
 
 
