@@ -304,7 +304,7 @@ void decodeLinear(
 /////////////////////////////////////////////////////////////
 
 
-size_t encodeCount(
+size_t encodePic(
 		const double *data, 
 		size_t dataSize, 
 		unsigned char *result
@@ -354,7 +354,7 @@ size_t encodeCount(
 
 
 
-size_t decodeCount(
+size_t decodePic(
 		const unsigned char *data,
 		const size_t dataSize,
 		double *result
@@ -398,42 +398,42 @@ size_t decodeCount(
 }
 
 
-void encodeCount(
+void encodePic(
 		const std::vector<double> &data,  
 		std::vector<unsigned char> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize * 5);
-	size_t encodedLength = encodeCount(&data[0], dataSize, &result[0]);
+	size_t encodedLength = encodePic(&data[0], dataSize, &result[0]);
 	result.resize(encodedLength);
 }
 
 
 
-void decodeCount(
+void decodePic(
 		const std::vector<unsigned char> &data,  
 		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize * 2);
-	size_t decodedLength = decodeCount(&data[0], dataSize, &result[0]);
+	size_t decodedLength = decodePic(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
 
 /////////////////////////////////////////////////////////////
 
-size_t encode2ByteFloat(
+size_t encodeSlof(
 		const double *data, 
 		size_t dataSize, 
 		unsigned char *result
 ) {
 	size_t i, ri;
 	unsigned short fp;
+	double logged;
 	ri = 0;
 
 	for (i=0; i<dataSize; i++) {
-		fp = log(data[i]) * ENC_TWO_BYTE_FIXED_POINT + 0.5;
-		
+		fp = log(data[i]+1) * ENC_TWO_BYTE_FIXED_POINT + 0.5;
 		result[ri++] = fp & 0xff;
 		result[ri++] = fp >> 8;
 	}
@@ -442,7 +442,7 @@ size_t encode2ByteFloat(
 
 
 
-size_t decode2ByteFloat(
+size_t decodeSlof(
 		const unsigned char *data, 
 		const size_t dataSize, 
 		double *result
@@ -453,30 +453,30 @@ size_t decode2ByteFloat(
 
 	for (i=0; i<dataSize; i+=2) {
 		fp = data[i] | (data[i+1] << 8);
-		result[ri++] = exp(fp / ENC_TWO_BYTE_FIXED_POINT);
+		result[ri++] = exp(fp / ENC_TWO_BYTE_FIXED_POINT) - 1;
 	}
 	return ri;
 }
 
-void encode2ByteFloat(
+void encodeSlof(
 		const std::vector<double> &data,  
 		std::vector<unsigned char> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize * 2);
-	size_t encodedLength = encode2ByteFloat(&data[0], dataSize, &result[0]);
+	size_t encodedLength = encodeSlof(&data[0], dataSize, &result[0]);
 	result.resize(encodedLength);
 }
 
 
 
-void decode2ByteFloat(
+void decodeSlof(
 		const std::vector<unsigned char> &data,  
 		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize / 2);
-	size_t decodedLength = decode2ByteFloat(&data[0], dataSize, &result[0]);
+	size_t decodedLength = decodeSlof(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
 

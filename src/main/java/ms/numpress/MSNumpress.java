@@ -79,6 +79,8 @@ class MSNumpress {
 	}
 	
 	
+	/////////////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point repressentation
@@ -192,6 +194,9 @@ class MSNumpress {
 	}
 	
 	
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * Encodes ion counts by simply rounding to the nearest 4 byte integer, 
 	 * and compressing each integer with encodeInt. 
@@ -200,7 +205,7 @@ class MSNumpress {
 	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
 	 * data is close to 0 on average.
 	 */
-	public static int encodeCount(
+	public static int encodePic(
 			double[] data, 
 			int dataSize, 
 			byte[] result
@@ -235,12 +240,12 @@ class MSNumpress {
 	
 	
 	/**
-	 * Decodes data encoded by encodeCount
+	 * Decodes data encoded by encodePic
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
 	 * returns the number of doubles read
 	 */
-	public static int decodeCount(
+	public static int decodePic(
 			byte[] data, 
 			int dataSize, 
 			double[] result
@@ -261,13 +266,17 @@ class MSNumpress {
 	}
 	
 	
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	
 	/**
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
 	 * 
 	 * unsigned short fp = log(d) * 3000.0 + 0.5
 	 */
-	public static int encode2ByteFloat(
+	public static int encodeSlof(
 			double[] data, 
 			int dataSize, 
 			byte[] result
@@ -276,7 +285,7 @@ class MSNumpress {
 		int ri = 0;
 		
 		for (int i=0; i<dataSize; i++) {
-			fp = (int)(Math.log(data[i]) * ENC_TWO_BYTE_FIXED_POINT + 0.5);
+			fp = (int)(Math.log(data[i]+1) * ENC_TWO_BYTE_FIXED_POINT + 0.5);
 		
 			result[ri++] = (byte)(0xff & fp);
 			result[ri++] = (byte)(fp >> 8);
@@ -286,12 +295,12 @@ class MSNumpress {
 	
 	
 	/**
-	 * Decodes data encoded by encode2ByteFloat
+	 * Decodes data encoded by encodeSlof
 	 *
 	 * result vector length is twice the data length
 	 * returns the number of doubles read
 	 */
-	public static int decode2ByteFloat(
+	public static int decodeSlof(
 			byte[] data, 
 			int dataSize, 
 			double[] result
@@ -301,7 +310,7 @@ class MSNumpress {
 	
 		for (int i=0; i<dataSize; i+=2) {
 			fp = (0xff & data[i]) | ((0xff & data[i+1]) << 8);
-			result[ri++] = Math.exp(((double)(0xffff & fp)) / ENC_TWO_BYTE_FIXED_POINT);
+			result[ri++] = Math.exp(((double)(0xffff & fp)) / ENC_TWO_BYTE_FIXED_POINT) - 1;
 		}
 		return ri;
 	}

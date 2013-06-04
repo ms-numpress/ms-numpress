@@ -150,7 +150,7 @@ public class MSNumpressTest {
 
 
 	@Test
-	public void encodeDecodeCount() {
+	public void encodeDecodePic() {
 		
 		int n = 1000;
 		double[] ics = new double[n];
@@ -158,9 +158,9 @@ public class MSNumpressTest {
 			ics[i] = Math.pow(10, 6*Math.random());
 		
 		byte[] encoded 		= new byte[n * 5];
-		int encodedBytes 	= MSNumpress.encodeCount(ics, n, encoded);
+		int encodedBytes 	= MSNumpress.encodePic(ics, n, encoded);
 		double[] decoded 	= new double[n];
-		int decodedDoubles 	= MSNumpress.decodeCount(encoded, encodedBytes, decoded);
+		int decodedDoubles 	= MSNumpress.decodePic(encoded, encodedBytes, decoded);
 		
 		assertEquals(n, decodedDoubles);
 		
@@ -170,7 +170,7 @@ public class MSNumpressTest {
 
 
 	@Test
-	public void encodeDecode2ByteFloat() {
+	public void encodeDecodeSlof() {
 		
 		int n = 1000;
 		double[] ics = new double[n];
@@ -178,13 +178,104 @@ public class MSNumpressTest {
 			ics[i] = Math.pow(10, 6*Math.random());
 		
 		byte[] encoded 		= new byte[n * 5];
-		int encodedBytes 	= MSNumpress.encode2ByteFloat(ics, n, encoded);
+		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded);
 		double[] decoded 	= new double[n];
-		int decodedDoubles 	= MSNumpress.decode2ByteFloat(encoded, encodedBytes, decoded);
+		int decodedDoubles 	= MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
 		
 		assertEquals(n, decodedDoubles);
 		
 		for (int i=0; i<n; i++)
 			assertEquals(0.0, (ics[i] - decoded[i]) / ((ics[i] + decoded[i])/2), 0.0005);
+	}
+
+
+	@Test
+	public void encodeDecodeLinear5() {
+		
+		int n = 1000;
+		double[] mzs = new double[n];
+		mzs[0] = 300 + Math.random();
+		for (int i=1; i<n; i++) 
+			mzs[i] = mzs[i-1] + Math.random();
+		
+		byte[] encoded 		= new byte[n * 5];
+		double[] decoded 	= new double[n];
+		double[] firstDecoded = new double[n];
+		
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, n, encoded);
+		int decodedDoubles 	= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
+		
+		for (int i=0; i<n; i++)
+			firstDecoded[i] = decoded[i];
+			
+		for (int i=0; i<5; i++) {
+			MSNumpress.encodeLinear(decoded, n, encoded);
+			MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
+		}
+		
+		assertEquals(n, decodedDoubles);
+		
+		for (int i=0; i<n; i++) 
+			assertEquals(firstDecoded[i], decoded[i], Double.MIN_VALUE);
+	}
+
+
+	@Test
+	public void encodeDecodePic5() {
+		
+		int n = 1000;
+		double[] ics = new double[n];
+		for (int i=0; i<n; i++) 
+			ics[i] = Math.pow(10, 6*Math.random());
+		
+		byte[] encoded 		= new byte[n * 5];
+		double[] decoded 	= new double[n];
+		double[] firstDecoded = new double[n];
+		
+		int encodedBytes 	= MSNumpress.encodePic(ics, n, encoded);
+		int decodedDoubles 	= MSNumpress.decodePic(encoded, encodedBytes, decoded);
+		
+		for (int i=0; i<n; i++)
+			firstDecoded[i] = decoded[i];
+			
+		for (int i=0; i<5; i++) {
+			MSNumpress.encodePic(decoded, n, encoded);
+			MSNumpress.decodePic(encoded, encodedBytes, decoded);
+		}
+		
+		assertEquals(n, decodedDoubles);
+		
+		for (int i=0; i<n; i++) 
+			assertEquals(firstDecoded[i], decoded[i], Double.MIN_VALUE);
+	}
+
+
+	@Test
+	public void encodeDecodeSlof5() {
+		
+		int n = 1000;
+		double[] ics = new double[n];
+		for (int i=0; i<n; i++) 
+			ics[i] = Math.pow(10, 6*Math.random());
+		
+		byte[] encoded 		= new byte[n * 5];
+		double[] decoded 	= new double[n];
+		double[] firstDecoded = new double[n];
+		
+		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded);
+		int decodedDoubles 	= MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
+		
+		for (int i=0; i<n; i++)
+			firstDecoded[i] = decoded[i];
+			
+		for (int i=0; i<5; i++) {
+			MSNumpress.encodeSlof(decoded, n, encoded);
+			MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
+		}
+		
+		assertEquals(n, decodedDoubles);
+		
+		for (int i=0; i<n; i++) 
+			assertEquals(firstDecoded[i], decoded[i], Double.MIN_VALUE);
 	}
 }

@@ -124,23 +124,23 @@ namespace MSNumpress {
 	 * @result		pointer to were resulting bytes should be stored
 	 * @return		the number of encoded bytes
 	 */
-	size_t encodeCount(
+	size_t encodePic(
 		const double *data, 
 		const size_t dataSize, 
 		unsigned char *result);
 		
 	/**
-	 * Calls lower level encodeCount while handling vector sizes appropriately
+	 * Calls lower level encodePic while handling vector sizes appropriately
 	 *
 	 * @data		vector of doubles to be encoded
 	 * @result		vector of resulting bytes (will be resized to the number of bytes)
 	 */
-	void encodeCount(
+	void encodePic(
 		const std::vector<double> &data,
 		std::vector<unsigned char> &result);
 
 	/**
-	 * Decodes data encoded by encodeCount
+	 * Decodes data encoded by encodePic
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
 	 *
@@ -149,17 +149,17 @@ namespace MSNumpress {
 	 * @result		pointer to were resulting doubles should be stored
 	 * @return		the number of decoded doubles
 	 */
-	void decodeCount(
+	void decodePic(
 		const std::vector<unsigned char> &data,
 		std::vector<double> &result);
 	
 	/**
-	 * Calls lower level decodeCount while handling vector sizes appropriately
+	 * Calls lower level decodePic while handling vector sizes appropriately
 	 *
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
 	 */
-	size_t decodeCount(
+	size_t decodePic(
 		const unsigned char *data,
 		const size_t dataSize,
 		double *result);
@@ -168,7 +168,10 @@ namespace MSNumpress {
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
 	 * 
-	 * unsigned short fp = log(d) * 3000.0 + 0.5
+	 * unsigned short fp = log(d + 1) * 3000.0 + 0.5
+	 *
+	 * Note that this fixed point will mean any d < 0.00016667 will be 
+	 * stored as a zero and mapped back to a zero. 
 	 *
 	 * result vector is exactly twice the data length (in nbr of values)
 	 *
@@ -177,41 +180,41 @@ namespace MSNumpress {
 	 * @result		pointer to were resulting bytes should be stored
 	 * @return		the number of encoded bytes
 	 */
-	size_t encode2ByteFloat(
+	size_t encodeSlof(
 		const double *data, 
 		const size_t dataSize, 
 		unsigned char *result);
 		
 	/**
-	 * Calls lower level encode2ByteFloat while handling vector sizes appropriately
+	 * Calls lower level encodeSlof while handling vector sizes appropriately
 	 *
 	 * @data		vector of doubles to be encoded
 	 * @result		vector of resulting bytes (will be resized to the number of bytes)
 	 */
-	void encode2ByteFloat(
+	void encodeSlof(
 		const std::vector<double> &data,
 		std::vector<unsigned char> &result);
 
 	/**
-	 * Decodes data encoded by encode2ByteFloat
+	 * Decodes data encoded by encodeSlof
 	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
 	 * @result		pointer to were resulting doubles should be stored
 	 * @return		the number of decoded doubles
 	 */
-	size_t decode2ByteFloat(
+	size_t decodeSlof(
 		const unsigned char *data, 
 		const size_t dataSize, 
 		double *result);
 	
 	/**
-	 * Calls lower level decode2ByteFloat while handling vector sizes appropriately
+	 * Calls lower level decodeSlof while handling vector sizes appropriately
 	 *
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
 	 */
-	void decode2ByteFloat(
+	void decodeSlof(
 		const std::vector<unsigned char> &data,
 		std::vector<double> &result);
 
