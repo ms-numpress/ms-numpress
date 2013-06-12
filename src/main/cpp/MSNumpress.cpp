@@ -165,12 +165,17 @@ size_t encodeLinear(
 	int diff;
 
 	//printf("Encoding %d doubles\n", (int)dataSize);
+	if (dataSize == 0) return 0;
 
 	ints[1] = data[0] * ENC_LINEAR_FIXED_POINT + 0.5;
-	ints[2] = data[1] * ENC_LINEAR_FIXED_POINT + 0.5;
-	
 	for (i=0; i<4; i++) {
 		result[0+i] = (ints[1] >> (i*8)) & 0xff;
+	}
+
+	if (dataSize == 1) return 4;
+
+	ints[2] = data[1] * ENC_LINEAR_FIXED_POINT + 0.5;
+	for (i=0; i<4; i++) {
 		result[4+i] = (ints[2] >> (i*8)) & 0xff;
 	}
 
@@ -229,16 +234,22 @@ size_t decodeLinear(
 	int extrapol;
 	int y;
 
+	if (dataSize < 4) return -1;
+	
 	try {
 		ints[1] = 0;
-		ints[2] = 0;
-
 		for (i=0; i<4; i++) {
 			ints[1] = ints[1] | ((0xff & (init = data[i])) << (i*8));
+		}
+		result[0] = ints[1] / ENC_LINEAR_FIXED_POINT;
+
+		if (dataSize == 4) return 1;
+		if (dataSize < 8) return -1;
+
+		ints[2] = 0;
+		for (i=0; i<4; i++) {
 			ints[2] = ints[2] | ((0xff & (init = data[4+i])) << (i*8));
 		}
-
-		result[0] = ints[1] / ENC_LINEAR_FIXED_POINT;
 		result[1] = ints[2] / ENC_LINEAR_FIXED_POINT;
 			
 		half = 0;

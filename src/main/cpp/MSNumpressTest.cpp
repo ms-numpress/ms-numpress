@@ -34,6 +34,27 @@ using std::cout;
 using std::endl;
 using std::abs;
 
+
+void encodeLinear1() {
+	cout << "test encodeLinear1: ";
+
+	double mzs[1];
+	
+	mzs[0] = 100.0;
+	
+	size_t nMzs = 1;
+	unsigned char encoded[4];
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0]);
+	
+	assert(4 == encodedBytes);
+	assert(0x80 == encoded[0]);
+	assert(0x96 == encoded[1]);
+	assert(0x98 == encoded[2]);
+	assert(0x00 == encoded[3]);
+	
+	cout << "Passed" << endl;
+}
+
 void encodeLinear() {
 	cout << "test encodeLinear: ";
 
@@ -106,6 +127,22 @@ void decodeLinearWierd() {
 	assert(abs(200.0 - decoded[1]) < 0.000005);
 	assert(abs(300.00005 - decoded[2]) < 0.000005);
 	assert(abs(0.00010 - decoded[3]) < 0.000005);
+	
+	cout << "Passed" << endl;
+}
+
+void decodeLinearFaulty() {
+	cout << "test decodeLinearFaulty: ";
+	
+	unsigned char encoded[20];
+	double decoded[4];
+	
+	size_t numDecoded;
+	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 3, &decoded[0]);
+	assert(-1 == numDecoded);
+	
+	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 6, &decoded[0]);
+	assert(-1 == numDecoded);
 	
 	cout << "Passed" << endl;
 }
@@ -332,7 +369,9 @@ void encodeDecodeSlof5() {
 
 
 int main(int argc, const char* argv[]) {
+	encodeLinear1();
 	encodeLinear();
+	decodeLinearFaulty();
 	decodeLinearNice();
 	decodeLinearWierd();
 	encodeDecodeLinear();

@@ -94,7 +94,7 @@ namespace MSNumpress {
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
 	 * @result		pointer to were resulting doubles should be stored
-	 * @return		the number of decoded doubles
+	 * @return		the number of decoded doubles, or -1 if dataSize < 4 or 4 < dataSize < 8
 	 */
 	size_t decodeLinear(
 		const unsigned char *data,
