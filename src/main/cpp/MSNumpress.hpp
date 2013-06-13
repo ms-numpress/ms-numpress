@@ -48,6 +48,11 @@ namespace ms {
 namespace numpress {
 
 namespace MSNumpress {
+	
+	double optimalLinearFixedPoint(
+		const double *data, 
+		size_t dataSize);
+	
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point repressentation
@@ -68,7 +73,8 @@ namespace MSNumpress {
 	size_t encodeLinear(
 		const double *data, 
 		const size_t dataSize, 
-		unsigned char *result);
+		unsigned char *result,
+		double fixedPoint);
 	
 	/**
 	 * Calls lower level encodeLinear while handling vector sizes appropriately
@@ -78,7 +84,8 @@ namespace MSNumpress {
 	 */
 	void encodeLinear(
 		const std::vector<double> &data, 
-		std::vector<unsigned char> &result);
+		std::vector<unsigned char> &result,
+		double fixedPoint);
 
 	/**
 	 * Decodes data encoded by encodeLinear. Note that the compression 
@@ -99,7 +106,8 @@ namespace MSNumpress {
 	size_t decodeLinear(
 		const unsigned char *data,
 		const size_t dataSize,
-		double *result);
+		double *result,
+		double fixedPoint);
 	
 	/**
 	 * Calls lower level decodeLinear while handling vector sizes appropriately
@@ -109,7 +117,10 @@ namespace MSNumpress {
 	 */
 	void decodeLinear(
 		const std::vector<unsigned char> &data,
-		std::vector<double> &result);
+		std::vector<double> &result,
+		double fixedPoint);
+
+/////////////////////////////////////////////////////////////
 
 	/**
 	 * Encodes ion counts by simply rounding to the nearest 4 byte integer, 
@@ -164,6 +175,13 @@ namespace MSNumpress {
 		const size_t dataSize,
 		double *result);
 
+/////////////////////////////////////////////////////////////
+
+
+	double optimalSlofFixedPoint(
+		const double *data, 
+		size_t dataSize);
+
 	/**
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
@@ -183,7 +201,8 @@ namespace MSNumpress {
 	size_t encodeSlof(
 		const double *data, 
 		const size_t dataSize, 
-		unsigned char *result);
+		unsigned char *result,
+		double fixedPoint);
 		
 	/**
 	 * Calls lower level encodeSlof while handling vector sizes appropriately
@@ -193,7 +212,8 @@ namespace MSNumpress {
 	 */
 	void encodeSlof(
 		const std::vector<double> &data,
-		std::vector<unsigned char> &result);
+		std::vector<unsigned char> &result,
+		double fixedPoint);
 
 	/**
 	 * Decodes data encoded by encodeSlof
@@ -206,7 +226,8 @@ namespace MSNumpress {
 	size_t decodeSlof(
 		const unsigned char *data, 
 		const size_t dataSize, 
-		double *result);
+		double *result,
+		double fixedPoint);
 	
 	/**
 	 * Calls lower level decodeSlof while handling vector sizes appropriately
@@ -216,7 +237,8 @@ namespace MSNumpress {
 	 */
 	void decodeSlof(
 		const std::vector<unsigned char> &data,
-		std::vector<double> &result);
+		std::vector<double> &result,
+		double fixedPoint);
 
 } // namespace MSNumpress
 } // namespace msdata
