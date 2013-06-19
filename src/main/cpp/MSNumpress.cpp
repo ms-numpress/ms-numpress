@@ -36,6 +36,46 @@ using std::min;
 using std::max;
 using std::abs;
 
+
+const int ONE = 1;
+bool is_big_endian() {
+	return *((char*)&(ONE)) == 1;
+}
+bool IS_BIG_ENDIAN = is_big_endian();
+
+
+
+/////////////////////////////////////////////////////////////
+
+void encodeFixedPoint(
+		double fixedPoint, 
+		unsigned char *result
+) {
+	int i;
+	unsigned char *fp = (unsigned char*)&fixedPoint;
+	for (i=0; i<8; i++) {
+		result[i] = fp[IS_BIG_ENDIAN ? (7-i) : i];
+	}
+}
+
+
+
+double decodeFixedPoint(
+		const unsigned char *data
+) {
+	int i;
+	double fixedPoint;
+	unsigned char *fp = (unsigned char*)&fixedPoint;
+		
+	for (i=0; i<8; i++) {
+		fp[i] = data[IS_BIG_ENDIAN ? (7-i) : i];
+	}
+	
+	return fixedPoint;
+}
+
+/////////////////////////////////////////////////////////////
+
 /**
  * Encodes the int x as a number of halfbytes in res. 
  * res_length is incremented by the number of halfbytes, 
@@ -170,7 +210,7 @@ double optimalLinearFixedPoint(
 	return floor(0xFFFFFFFF / maxDouble);
 	*/
 	if (dataSize == 0) return 0;
-	if (dataSize == 1) return floor(0xFFFFFFFF / data[0]);
+	if (dataSize == 1) return floor(0x7FFFFFFFl / data[0]);
 	double maxDouble = max(data[0], data[1]);
 	double extrapol;
 	double diff;
@@ -181,7 +221,7 @@ double optimalLinearFixedPoint(
 		maxDouble = max(maxDouble, ceil(abs(diff)+1));
 	}
 
-	return floor(0xFFFFFFFF / maxDouble);
+	return floor(0x7FFFFFFFl / maxDouble);
 }
 
 size_t encodeLinear(
@@ -199,22 +239,25 @@ size_t encodeLinear(
 	int diff;
 
 	//printf("Encoding %d doubles with fixed point %f\n", (int)dataSize, fixedPoint);
-	if (dataSize == 0) return 0;
+	encodeFixedPoint(fixedPoint, result);
+
+
+	if (dataSize == 0) return 8;
 
 	ints[1] = data[0] * fixedPoint + 0.5;
 	for (i=0; i<4; i++) {
-		result[0+i] = (ints[1] >> (i*8)) & 0xff;
+		result[8+i] = (ints[1] >> (i*8)) & 0xff;
 	}
 
-	if (dataSize == 1) return 4;
+	if (dataSize == 1) return 12;
 
 	ints[2] = data[1] * fixedPoint + 0.5;
 	for (i=0; i<4; i++) {
-		result[4+i] = (ints[2] >> (i*8)) & 0xff;
+		result[12+i] = (ints[2] >> (i*8)) & 0xff;
 	}
 
 	halfByteCount = 0;
-	ri = 8;
+	ri = 16;
 
 	for (i=2; i<dataSize; i++) {
 		ints[0] = ints[1];
@@ -256,8 +299,7 @@ size_t encodeLinear(
 size_t decodeLinear(
 		const unsigned char *data,
 		const size_t dataSize,
-		double *result,
-		double fixedPoint
+		double *result
 ) {
 	size_t i;
 	size_t ri = 0;
@@ -269,30 +311,36 @@ size_t decodeLinear(
 	int half;
 	long long extrapol;
 	long long y;
-
+	double fixedPoint;
+	
 	//printf("Decoding %d bytes with fixed point %f\n", (int)dataSize, fixedPoint);
 
-	if (dataSize < 4) return -1;
+	if (dataSize < 8) return -1;
+	
+	fixedPoint = decodeFixedPoint(data);
+
+
+	if (dataSize < 12) return -1;
 	
 	try {
 		ints[1] = 0;
 		for (i=0; i<4; i++) {
-			ints[1] = ints[1] | ((0xff & (init = data[i])) << (i*8));
+			ints[1] = ints[1] | ((0xff & (init = data[8+i])) << (i*8));
 		}
 		result[0] = ints[1] / fixedPoint;
 
-		if (dataSize == 4) return 1;
-		if (dataSize < 8) return -1;
+		if (dataSize == 12) return 1;
+		if (dataSize < 16) return -1;
 
 		ints[2] = 0;
 		for (i=0; i<4; i++) {
-			ints[2] = ints[2] | ((0xff & (init = data[4+i])) << (i*8));
+			ints[2] = ints[2] | ((0xff & (init = data[12+i])) << (i*8));
 		}
 		result[1] = ints[2] / fixedPoint;
 			
 		half = 0;
 		ri = 2;
-		di = 8;
+		di = 16;
 		
 		while (di < dataSize) {
 			ints[0] = ints[1];
@@ -343,12 +391,11 @@ void encodeLinear(
 
 void decodeLinear(
 		const std::vector<unsigned char> &data,
-		std::vector<double> &result,
-		double fixedPoint
+		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize * 2);
-	size_t decodedLength = decodeLinear(&data[0], dataSize, &result[0], fixedPoint);
+	size_t decodedLength = decodeLinear(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
 
@@ -503,13 +550,14 @@ size_t encodeSlof(
 		double fixedPoint
 ) {
 	size_t i, ri;
-	unsigned short fp;
-	ri = 0;
+	unsigned short x;
+	encodeFixedPoint(fixedPoint, result);
 
+	ri = 8;
 	for (i=0; i<dataSize; i++) {
-		fp = log(data[i]+1) * fixedPoint + 0.5;
-		result[ri++] = fp & 0xff;
-		result[ri++] = fp >> 8;
+		x = log(data[i]+1) * fixedPoint + 0.5;
+		result[ri++] = x & 0xff;
+		result[ri++] = x >> 8;
 	}
 	return ri;
 }
@@ -519,16 +567,19 @@ size_t encodeSlof(
 size_t decodeSlof(
 		const unsigned char *data, 
 		const size_t dataSize, 
-		double *result,
-		double fixedPoint
+		double *result
 ) {
 	size_t i, ri;
-	unsigned short fp;
+	unsigned short x;
 	ri = 0;
+	double fixedPoint;
 
-	for (i=0; i<dataSize; i+=2) {
-		fp = data[i] | (data[i+1] << 8);
-		result[ri++] = exp(fp / fixedPoint) - 1;
+	if (dataSize < 8) return -1;
+	fixedPoint = decodeFixedPoint(data);
+
+	for (i=8; i<dataSize; i+=2) {
+		x = data[i] | (data[i+1] << 8);
+		result[ri++] = exp(x / fixedPoint) - 1;
 	}
 	return ri;
 }
@@ -548,12 +599,11 @@ void encodeSlof(
 
 void decodeSlof(
 		const std::vector<unsigned char> &data,  
-		std::vector<double> &result,
-		double fixedPoint
+		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
 	result.resize(dataSize / 2);
-	size_t decodedLength = decodeSlof(&data[0], dataSize, &result[0], fixedPoint);
+	size_t decodedLength = decodeSlof(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
 

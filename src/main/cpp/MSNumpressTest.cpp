@@ -36,7 +36,6 @@ using std::abs;
 using std::max;
 
 
-double ENC_LINEAR_FIXED_POINT = 100000.0;
 double ENC_TWO_BYTE_FIXED_POINT = 3000.0;
 
 
@@ -48,14 +47,14 @@ void encodeLinear1() {
 	mzs[0] = 100.0;
 	
 	size_t nMzs = 1;
-	unsigned char encoded[4];
-	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], ENC_LINEAR_FIXED_POINT);
+	unsigned char encoded[12];
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 100000.0);
 	
-	assert(4 == encodedBytes);
-	assert(0x80 == encoded[0]);
-	assert(0x96 == encoded[1]);
-	assert(0x98 == encoded[2]);
-	assert(0x00 == encoded[3]);
+	assert(12 == encodedBytes);
+	assert(0x80 == encoded[8]);
+	assert(0x96 == encoded[9]);
+	assert(0x98 == encoded[10]);
+	assert(0x00 == encoded[11]);
 	
 	cout << "+ pass    encodeLinear1 " << endl << endl;
 }
@@ -70,17 +69,32 @@ void encodeLinear() {
 	
 	size_t nMzs = 4;
 	unsigned char encoded[20];
-	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], ENC_LINEAR_FIXED_POINT);
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 100000.0);
 	
-	assert(10 == encodedBytes);
-	assert(0x80 == encoded[0]);
-	assert(0x96 == encoded[1]);
-	assert(0x98 == encoded[2]);
-	assert(0x00 == encoded[3]);
-	assert(0x75 == encoded[8]);
-	assert(0x80 == encoded[9]);
+	assert(18 == encodedBytes);
+	assert(0x80 == encoded[8]);
+	assert(0x96 == encoded[9]);
+	assert(0x98 == encoded[10]);
+	assert(0x00 == encoded[11]);
+	assert(0x75 == encoded[16]);
+	assert(0x80 == encoded[17]);
 	
 	cout << "+ pass    encodeLinear " << endl << endl;
+}
+
+
+void decodeLinearFaulty() {
+	unsigned char encoded[20];
+	double decoded[4];
+	
+	size_t numDecoded;
+	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 11, &decoded[0]);
+	assert(-1 == numDecoded);
+	
+	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 14, &decoded[0]);
+	assert(-1 == numDecoded);
+	
+	cout << "+ pass    decodeLinearFaulty " << endl << endl;
 }
 
 
@@ -94,11 +108,12 @@ void decodeLinearNice() {
 	mzs[3] = 400.00010;
 	
 	size_t nMzs = 4;
-	unsigned char encoded[20];
-	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], ENC_LINEAR_FIXED_POINT);
+	unsigned char encoded[28];
+	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], nMzs);
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], fixedPoint);
 	
 	double decoded[4];
-	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], ENC_LINEAR_FIXED_POINT);
+	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	assert(4 == numDecoded);
 	assert(abs(100.0 - decoded[0]) < 0.000005);
 	assert(abs(200.0 - decoded[1]) < 0.000005);
@@ -117,11 +132,12 @@ void decodeLinearWierd() {
 	mzs[3] = 0.00010;
 	
 	size_t nMzs = 4;
-	unsigned char encoded[20];
-	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], ENC_LINEAR_FIXED_POINT);
+	unsigned char encoded[28];
+	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], nMzs);
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], fixedPoint);
 	
 	double decoded[4];
-	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], ENC_LINEAR_FIXED_POINT);
+	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	assert(4 == numDecoded);
 	assert(abs(100.0 - decoded[0]) < 0.000005);
 	assert(abs(200.0 - decoded[1]) < 0.000005);
@@ -129,20 +145,6 @@ void decodeLinearWierd() {
 	assert(abs(0.00010 - decoded[3]) < 0.000005);
 	
 	cout << "+ pass    decodeLinearWierd " << endl << endl;
-}
-
-void decodeLinearFaulty() {
-	unsigned char encoded[20];
-	double decoded[4];
-	
-	size_t numDecoded;
-	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 3, &decoded[0], ENC_LINEAR_FIXED_POINT);
-	assert(-1 == numDecoded);
-	
-	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 6, &decoded[0], ENC_LINEAR_FIXED_POINT);
-	assert(-1 == numDecoded);
-	
-	cout << "+ pass    decodeLinearFaulty " << endl << endl;
 }
 
 
@@ -174,7 +176,7 @@ void encodeDecodeLinearStraight() {
 	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], n, &encoded[0], fixedPoint);
 	
 	double decoded[15];
-	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	
 	assert(n == numDecoded);
 	
@@ -211,7 +213,7 @@ void encodeDecodeLinear() {
 	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], n, &encoded[0], fixedPoint);
 	
 	double decoded[1000];
-	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+	size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	
 	assert(n == numDecoded);
 	
@@ -252,14 +254,14 @@ void encodeDecodeLinear5() {
 	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], n);
 	
 	encodedBytes 	= ms::numpress::MSNumpress::encodeLinear(&mzs[0], n, &encoded[0], fixedPoint);
-	numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+	numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	
 	for (int i=0; i<n; i++) 
 		firstDecoded[i] = decoded[i];
 	
 	for (int i=0; i<5; i++) {
 		encodedBytes 	= ms::numpress::MSNumpress::encodeLinear(&decoded[0], n, &encoded[0], fixedPoint);
-		numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+		numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	}
 	
 	double afterFixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&decoded[0], n);
@@ -377,7 +379,7 @@ void encodeDecodeSlof() {
 	size_t encodedBytes = ms::numpress::MSNumpress::encodeSlof(&ics[0], n, &encoded[0], fixedPoint);
 	
 	double decoded[1000];
-	size_t numDecoded = ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+	size_t numDecoded = ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0]);
 	
 	assert(n == numDecoded);
 	
@@ -431,14 +433,14 @@ void encodeDecodeSlof5() {
 	double decoded[1000];
 	
 	encodedBytes 	= ms::numpress::MSNumpress::encodeSlof(&ics[0], n, &encoded[0], fixedPoint);
-	numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+	numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0]);
 	
 	for (int i=0; i<n; i++) 
 		firstDecoded[i] = decoded[i];
 	
 	for (int i=0; i<5; i++) {
 		encodedBytes 	= ms::numpress::MSNumpress::encodeSlof(&decoded[0], n, &encoded[0], fixedPoint);
-		numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0], fixedPoint);
+		numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0]);
 	}
 	
 	double afterFixedPoint = ms::numpress::MSNumpress::optimalSlofFixedPoint(&decoded[0], n);

@@ -83,26 +83,55 @@ public class MSNumpressTest {
 		assertEquals(370000000L, l);
 	}
 
+
+
+	@Test
+	public void encodeFixedPoint() {
+		byte[] encoded 		= new byte[8];
+		MSNumpress.encodeFixedPoint(1.00, encoded);
+		assertEquals(0x0, 0xff & encoded[0]);
+		assertEquals(0x0, 0xff & encoded[1]);
+		assertEquals(0x0, 0xff & encoded[2]);
+		assertEquals(0x0, 0xff & encoded[3]);
+		assertEquals(0x0, 0xff & encoded[4]);
+		assertEquals(0x0, 0xff & encoded[5]);
+		assertEquals(0xf0, 0xff & encoded[6]);
+		assertEquals(0x3f, 0xff & encoded[7]);
+	}
+
+
+
+	@Test
+	public void encodeDecodeFixedPoint() {
+		double fp = 300.21941382293625;
+		byte[] encoded 		= new byte[8];
+		MSNumpress.encodeFixedPoint(fp, encoded);
+		double decoded = MSNumpress.decodeFixedPoint(encoded);
+		assertEquals(fp, decoded, 0);
+	}
+
+
+
 	@Test
 	public void encodeLinear() {
 		double[] mzs = {100.0, 200.0, 300.00005, 400.00010};
-		byte[] encoded 		= new byte[16];
-		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded);
-		assertEquals(10, encodedBytes);
-		assertEquals(0x80, 0xff & encoded[0]);
-		assertEquals(0x96, 0xff & encoded[1]);
-		assertEquals(0x98, 0xff & encoded[2]);
-		assertEquals(0x00, 0xff & encoded[3]);
-		assertEquals(0x75, 0xff & encoded[8]);
-		assertEquals(0x80, 0xf0 & encoded[9]);
+		byte[] encoded 		= new byte[40];
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded, 100000.0);
+		assertEquals(18, encodedBytes);
+		assertEquals(0x80, 0xff & encoded[8]);
+		assertEquals(0x96, 0xff & encoded[9]);
+		assertEquals(0x98, 0xff & encoded[10]);
+		assertEquals(0x00, 0xff & encoded[11]);
+		assertEquals(0x75, 0xff & encoded[16]);
+		assertEquals(0x80, 0xf0 & encoded[17]);
 	}
 	
 	
 	@Test
 	public void decodeLinearNice() {
 		double[] mzs = {100.0, 200.0, 300.00005, 400.00010};
-		byte[] encoded 		= new byte[20];
-		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded);
+		byte[] encoded 		= new byte[28];
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded, 100000.0);
 		double[] decoded 	= new double[4];
 		int numDecoded 		= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		assertEquals(4, numDecoded);
@@ -116,8 +145,10 @@ public class MSNumpressTest {
 	@Test
 	public void decodeLinearWierd() {
 		double[] mzs = {100.0, 200.0, 4000.00005, 0.00010};
-		byte[] encoded 		= new byte[20];
-		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded);
+		byte[] encoded 		= new byte[28];
+		double fixedPoint	= MSNumpress.optimalLinearFixedPoint(mzs, 4);
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded, fixedPoint);
+		System.out.println("hehas: "+encodedBytes);
 		double[] decoded 	= new double[4];
 		int numDecoded 		= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		assertEquals(4, numDecoded);
@@ -138,7 +169,8 @@ public class MSNumpressTest {
 			mzs[i] = mzs[i-1] + Math.random();
 		
 		byte[] encoded 		= new byte[n * 5];
-		int encodedBytes 	= MSNumpress.encodeLinear(mzs, n, encoded);
+		double fixedPoint	= MSNumpress.optimalLinearFixedPoint(mzs, 1000);
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, n, encoded, fixedPoint);
 		double[] decoded 	= new double[n];
 		int decodedDoubles 	= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		
@@ -177,8 +209,9 @@ public class MSNumpressTest {
 		for (int i=0; i<n; i++)
 			ics[i] = Math.pow(10, 6*Math.random());
 		
-		byte[] encoded 		= new byte[n * 5];
-		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded);
+		byte[] encoded 		= new byte[n * 2+8];
+		double fixedPoint	= MSNumpress.optimalSlofFixedPoint(ics, n);
+		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded, fixedPoint);
 		double[] decoded 	= new double[n];
 		int decodedDoubles 	= MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
 		
@@ -201,15 +234,16 @@ public class MSNumpressTest {
 		byte[] encoded 		= new byte[n * 5];
 		double[] decoded 	= new double[n];
 		double[] firstDecoded = new double[n];
+		double fixedPoint	= MSNumpress.optimalLinearFixedPoint(mzs, n);
 		
-		int encodedBytes 	= MSNumpress.encodeLinear(mzs, n, encoded);
+		int encodedBytes 	= MSNumpress.encodeLinear(mzs, n, encoded, fixedPoint);
 		int decodedDoubles 	= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		
 		for (int i=0; i<n; i++)
 			firstDecoded[i] = decoded[i];
 			
 		for (int i=0; i<5; i++) {
-			MSNumpress.encodeLinear(decoded, n, encoded);
+			MSNumpress.encodeLinear(decoded, n, encoded, fixedPoint);
 			MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		}
 		
@@ -258,18 +292,19 @@ public class MSNumpressTest {
 		for (int i=0; i<n; i++) 
 			ics[i] = Math.pow(10, 6*Math.random());
 		
-		byte[] encoded 		= new byte[n * 5];
+		byte[] encoded 		= new byte[n * 2+8];
 		double[] decoded 	= new double[n];
 		double[] firstDecoded = new double[n];
+		double fixedPoint	= MSNumpress.optimalSlofFixedPoint(ics, n);
 		
-		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded);
+		int encodedBytes 	= MSNumpress.encodeSlof(ics, n, encoded, fixedPoint);
 		int decodedDoubles 	= MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
 		
 		for (int i=0; i<n; i++)
 			firstDecoded[i] = decoded[i];
 			
 		for (int i=0; i<5; i++) {
-			MSNumpress.encodeSlof(decoded, n, encoded);
+			MSNumpress.encodeSlof(decoded, n, encoded, fixedPoint);
 			MSNumpress.decodeSlof(encoded, encodedBytes, decoded);
 		}
 		

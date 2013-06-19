@@ -24,9 +24,25 @@ class MSNumpress {
 	protected static double ENC_LINEAR_FIXED_POINT = 100000.0;
 	protected static double ENC_TWO_BYTE_FIXED_POINT = 3000.0;
 	/**
-	 * Encodes the int x as a number of halfbytes in res. 
-	 * res_length is incremented by the number of halfbytes, 
-	 * which will be 1 <= n <= 9
+	 * This encoding works on a 4 byte integer, by truncating initial zeros or ones.
+	 * If the initial (most significant) half byte is 0x0 or 0xf, the number of such 
+	 * halfbytes starting from the most significant is stored in a halfbyte. This initial 
+	 * count is then followed by the rest of the ints halfbytes, in little-endian order. 
+	 * A count halfbyte c of
+	 * 
+	 * 		0 <= c <= 8 		is interpreted as an initial c 		0x0 halfbytes 
+	 * 		9 <= c <= 15		is interpreted as an initial (c-8) 	0xf halfbytes
+	 * 
+	 * Ex:
+	 * 	int		c		rest
+	 * 	0 	=> 	0x8
+	 * 	-1	=>	0xf		0xf
+	 * 	23	=>	0x6 	0x7	0x1
+	 * 
+	 * 	@x			the int to be encoded
+	 *	@res		the byte array were halfbytes are stored
+	 *	@resOffset	position in res were halfbytes are written
+	 *	@return		the number of resulting halfbytes
 	 */
 	protected static int encodeInt(
 			long x,
@@ -79,8 +95,52 @@ class MSNumpress {
 	}
 	
 	
+	
+	public static void encodeFixedPoint(
+			double fixedPoint, 
+			byte[] result
+	) {
+		long fp = Double.doubleToLongBits(fixedPoint);
+		for (int i=0; i<8; i++) {
+			result[i] = (byte)((fp >> (8*i)) & 0xff);
+		}
+	}
+	
+	
+	
+	public static double decodeFixedPoint(
+			byte[] data
+	) {
+		long fp = 0;
+		for (int i=0; i<8; i++) {
+			fp = fp | ((0xFFl & data[i]) << (8*i));
+		}
+		return Double.longBitsToDouble(fp);
+	}
+			
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////
 	
+	
+	public static double optimalLinearFixedPoint(
+		double[] data,
+		int dataSize
+	) {
+		if (dataSize == 0) return 0;
+		if (dataSize == 1) return Math.floor(0xFFFFFFFFl / data[0]);
+		double maxDouble = Math.max(data[0], data[1]);
+		
+		for (int i=2; i<dataSize; i++) {
+			double extrapol = data[i-1] + (data[i-1] - data[i-2]);
+			double diff 	= data[i] - extrapol;
+			maxDouble 		= Math.max(maxDouble, Math.ceil(Math.abs(diff)+1));
+		}
+
+		return Math.floor(0x7FFFFFFFl / maxDouble);
+	}
+
+
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point repressentation
@@ -92,33 +152,53 @@ class MSNumpress {
 	 *
 	 * This encoding is suitable for typical m/z or retention time binary arrays. 
 	 * For masses above 100 m/z the encoding is accurate to at least 0.1 ppm.
+	 *
+	 * @data		array of double to be encoded
+	 * @dataSize	number of doubles from data to encode
+	 * @result		array were resulting bytes should be stored
+	 * @fixedPoint	the scaling factor used for getting the fixed point repr. 
+	 * 				This is stored in the binary and automatically extracted
+	 * 				on decoding.
+	 * @return		the number of encoded bytes
 	 */
 	public static int encodeLinear(
 			double[] data, 
 			int dataSize, 
-			byte[] result
+			byte[] result,
+			double fixedPoint
 	) {
 		long[] ints = new long[3];
 		int i;
-		int ri = 8;
+		int ri = 16;
 		byte halfBytes[] = new byte[10];
 		int halfByteCount = 0;
 		int hbi;
 		long extrapol;
 		long diff;
+		
+		encodeFixedPoint(fixedPoint, result);
 
-		ints[1] = (long)(data[0] * ENC_LINEAR_FIXED_POINT + 0.5);
-		ints[2] = (long)(data[1] * ENC_LINEAR_FIXED_POINT + 0.5);
-
+		if (dataSize == 0) return 8;
+		
+		ints[1] = (long)(data[0] * fixedPoint + 0.5);
 		for (i=0; i<4; i++) {
-			result[i] 	= (byte)((ints[1] >> (i*8)) & 0xff);
-			result[4+i] = (byte)((ints[2] >> (i*8)) & 0xff);
+			result[8+i] = (byte)((ints[1] >> (i*8)) & 0xff);
+		}
+		 
+		if (dataSize == 1) return 12;
+		
+		ints[2] = (long)(data[1] * fixedPoint + 0.5);
+		for (i=0; i<4; i++) {
+			result[12+i] = (byte)((ints[2] >> (i*8)) & 0xff);
 		}
 
+		halfByteCount = 0;
+		ri = 16;
+		
 		for (i=2; i<dataSize; i++) {
 			ints[0] = ints[1];
 			ints[1] = ints[2];
-			ints[2] = (long)(data[i] * ENC_LINEAR_FIXED_POINT + 0.5);
+			ints[2] = (long)(data[i] * fixedPoint + 0.5);
 			extrapol = ints[1] + (ints[1] - ints[0]);
 			diff = ints[2] - extrapol;
 			halfByteCount += encodeInt(diff, halfBytes, halfByteCount);
@@ -152,6 +232,11 @@ class MSNumpress {
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
 	 * returns the number of doubles read
+	 *
+	 * @data		array of bytes to be decoded
+	 * @dataSize	number of bytes from data to decode
+	 * @result		array were resulting doubles should be stored
+	 * @return		the number of decoded doubles, or -1 if dataSize < 4 or 4 < dataSize < 8
 	 */
 	public static int decodeLinear(
 			byte[] data, 
@@ -162,18 +247,27 @@ class MSNumpress {
 		long[] ints = new long[3];
 		long extrapol;
 		long y;
-		IntDecoder dec = new IntDecoder(data, 8);
-
-		ints[1] = 0;
-		ints[2] = 0;
-
-		for (int i=0; i<4; i++) {
-			ints[1] = ints[1] | ( (0xFF & data[i]) << (i*8));
-			ints[2] = ints[2] | ( (0xFF & data[4+i]) << (i*8));
-		}
+		IntDecoder dec = new IntDecoder(data, 16);
 		
-		result[0] = ints[1] / ENC_LINEAR_FIXED_POINT;
-		result[1] = ints[2] / ENC_LINEAR_FIXED_POINT;
+		if (dataSize < 8) return -1;
+		double fixedPoint = decodeFixedPoint(data);	
+		System.out.println("fp: "+fixedPoint);
+		if (dataSize < 12) return -1;
+		
+		ints[1] = 0;
+		for (int i=0; i<4; i++) {
+			ints[1] = ints[1] | ( (0xFFl & data[8+i]) << (i*8));
+		}
+		result[0] = ints[1] / fixedPoint;
+		
+		if (dataSize == 12) return 1;
+		if (dataSize < 16) return -1;
+		
+		ints[2] = 0;
+		for (int i=0; i<4; i++) {
+			ints[2] = ints[2] | ( (0xFFl & data[12+i]) << (i*8));
+		}
+		result[1] = ints[2] / fixedPoint;
 	
 		while (dec.pos < dataSize) {
 			if (dec.pos == (dataSize - 1) && dec.half)
@@ -186,7 +280,7 @@ class MSNumpress {
 			
 			extrapol = ints[1] + (ints[1] - ints[0]);
 			y = extrapol + ints[2];
-			result[ri++] = y / ENC_LINEAR_FIXED_POINT;
+			result[ri++] = y / fixedPoint;
 			ints[2] = y;
 		}
 		
@@ -204,6 +298,11 @@ class MSNumpress {
 	 * The handleable range is therefore 0 -> 4294967294.
 	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
 	 * data is close to 0 on average.
+	 *
+	 * @data		array of doubles to be encoded
+	 * @dataSize	number of doubles from data to encode
+	 * @result		array were resulting bytes should be stored
+	 * @return		the number of encoded bytes
 	 */
 	public static int encodePic(
 			double[] data, 
@@ -243,7 +342,11 @@ class MSNumpress {
 	 * Decodes data encoded by encodePic
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
-	 * returns the number of doubles read
+	 *
+	 * @data		array of bytes to be decoded (need memorycont. repr.)
+	 * @dataSize	number of bytes from data to decode
+	 * @result		array were resulting doubles should be stored
+	 * @return		the number of decoded doubles
 	 */
 	public static int decodePic(
 			byte[] data, 
@@ -270,25 +373,56 @@ class MSNumpress {
 	
 	/////////////////////////////////////////////////////////////////////////////////
 	
+	public static double optimalSlofFixedPoint(
+			double[] data, 
+			int dataSize
+	) {
+		if (dataSize == 0) return 0;
+	
+		double maxDouble = 1;
+		double x;
+		double fp;
+
+		for (int i=0; i<dataSize; i++) {
+			x = Math.log(data[i]+1);
+			maxDouble = Math.max(maxDouble, x);
+		}
+
+		fp = Math.floor(0xFFFF / maxDouble);
+
+		return fp;
+	}
+
 	/**
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
 	 * 
-	 * unsigned short fp = log(d) * 3000.0 + 0.5
+	 * unsigned short fp = log(d) * fixedPoint + 0.5
+	 *
+	 * @data		array of doubles to be encoded
+	 * @dataSize	number of doubles from data to encode
+	 * @result		array were resulting bytes should be stored
+	 * @fixedPoint	the scaling factor used for getting the fixed point repr. 
+	 * 				This is stored in the binary and automatically extracted
+	 * 				on decoding.
+	 * @return		the number of encoded bytes
 	 */
 	public static int encodeSlof(
 			double[] data, 
 			int dataSize, 
-			byte[] result
+			byte[] result,
+			double fixedPoint
 	) {
-		int fp;
-		int ri = 0;
+		int x;
+		int ri = 8;
+		
+		encodeFixedPoint(fixedPoint, result);
 		
 		for (int i=0; i<dataSize; i++) {
-			fp = (int)(Math.log(data[i]+1) * ENC_TWO_BYTE_FIXED_POINT + 0.5);
+			x = (int)(Math.log(data[i]+1) * fixedPoint + 0.5);
 		
-			result[ri++] = (byte)(0xff & fp);
-			result[ri++] = (byte)(fp >> 8);
+			result[ri++] = (byte)(0xff & x);
+			result[ri++] = (byte)(x >> 8);
 		}
 		return ri;
 	}
@@ -299,18 +433,26 @@ class MSNumpress {
 	 *
 	 * result vector length is twice the data length
 	 * returns the number of doubles read
+	 *
+	 * @data		array of bytes to be decoded (need memorycont. repr.)
+	 * @dataSize	number of bytes from data to decode
+	 * @result		array were resulting doubles should be stored
+	 * @return		the number of decoded doubles
 	 */
 	public static int decodeSlof(
 			byte[] data, 
 			int dataSize, 
 			double[] result
 	) {
-		int fp;
+		int x;
 		int ri = 0;
-	
-		for (int i=0; i<dataSize; i+=2) {
-			fp = (0xff & data[i]) | ((0xff & data[i+1]) << 8);
-			result[ri++] = Math.exp(((double)(0xffff & fp)) / ENC_TWO_BYTE_FIXED_POINT) - 1;
+		
+		if (dataSize < 8) return -1;
+		double fixedPoint = decodeFixedPoint(data);	
+		
+		for (int i=8; i<dataSize; i+=2) {
+			x = (0xff & data[i]) | ((0xff & data[i+1]) << 8);
+			result[ri++] = Math.exp(((double)(0xffff & x)) / fixedPoint) - 1;
 		}
 		return ri;
 	}
