@@ -20,9 +20,11 @@ package ms.numpress;
 
 class MSNumpress {
 
+	///PSI-MS obo accession numbers.
+	public static final String ACC_NUMPRESS_LINEAR 	= "MS:1002312";
+	public static final String ACC_NUMPRESS_PIC 	= "MS:1002313";
+	public static final String ACC_NUMPRESS_SLOF 	= "MS:1002314";
 
-	protected static double ENC_LINEAR_FIXED_POINT = 100000.0;
-	protected static double ENC_TWO_BYTE_FIXED_POINT = 3000.0;
 	/**
 	 * This encoding works on a 4 byte integer, by truncating initial zeros or ones.
 	 * If the initial (most significant) half byte is 0x0 or 0xf, the number of such 
@@ -117,7 +119,53 @@ class MSNumpress {
 		}
 		return Double.longBitsToDouble(fp);
 	}
+	
+	
+	
+	/**
+	 * Convenience function for decoding binary data encoded by MSNumpress. If
+	 * the passed cvAccession is one of
+	 * 
+	 *    ACC_NUMPRESS_LINEAR = "MS:1002312"
+	 *    ACC_NUMPRESS_PIC    = "MS:1002313"
+	 *    ACC_NUMPRESS_SLOF   = "MS:1002314"
+	 * 
+	 * the corresponding decode function will be called.
+	 * 
+	 * @cvAccession		The PSI-MS obo CV accession of the encoded data.
+	 * @data			array of double to be encoded
+	 * @dataSize		number of doubles from data to encode
+	 * @return			The decoded doubles
+	 */
+	public static double[] decode(
+			String cvAccession, 
+			byte[] data, 
+			int dataSize
+	) {
+		
+		if (cvAccession.equals(ACC_NUMPRESS_LINEAR)) {
+			double[] buffer 	= new double[dataSize * 2];
+			int nbrOfDoubles 	= MSNumpress.decodeLinear(data, dataSize, buffer);
+			double[] result 	= new double[nbrOfDoubles];
+			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
+			return result;
 			
+		} else if (cvAccession.equals(ACC_NUMPRESS_SLOF)) {
+			double[] result 	= new double[dataSize / 2];
+			int nbrOfDoubles 	= MSNumpress.decodeSlof(data, dataSize, result);
+			return result;
+			
+		} else if (cvAccession.equals(ACC_NUMPRESS_PIC)) {
+			double[] buffer 	= new double[dataSize * 2];
+			int nbrOfDoubles 	= MSNumpress.decodePic(data, dataSize, buffer);
+			double[] result 	= new double[nbrOfDoubles];
+			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
+			return result;
+			
+		}
+		
+		throw new IllegalArgumentException("'"+cvAccession+"' is not a numpress compression term");
+	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +299,6 @@ class MSNumpress {
 		
 		if (dataSize < 8) return -1;
 		double fixedPoint = decodeFixedPoint(data);	
-		System.out.println("fp: "+fixedPoint);
 		if (dataSize < 12) return -1;
 		
 		ints[1] = 0;
