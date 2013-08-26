@@ -89,14 +89,14 @@ public class MSNumpressTest {
 	public void encodeFixedPoint() {
 		byte[] encoded 		= new byte[8];
 		MSNumpress.encodeFixedPoint(1.00, encoded);
-		assertEquals(0x0, 0xff & encoded[0]);
-		assertEquals(0x0, 0xff & encoded[1]);
+		assertEquals(0x3f, 0xff & encoded[0]);
+		assertEquals(0xf0, 0xff & encoded[1]);
 		assertEquals(0x0, 0xff & encoded[2]);
 		assertEquals(0x0, 0xff & encoded[3]);
 		assertEquals(0x0, 0xff & encoded[4]);
 		assertEquals(0x0, 0xff & encoded[5]);
-		assertEquals(0xf0, 0xff & encoded[6]);
-		assertEquals(0x3f, 0xff & encoded[7]);
+		assertEquals(0x0, 0xff & encoded[6]);
+		assertEquals(0x0, 0xff & encoded[7]);
 	}
 
 

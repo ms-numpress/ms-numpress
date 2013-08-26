@@ -102,7 +102,7 @@ class MSNumpress {
 	) {
 		long fp = Double.doubleToLongBits(fixedPoint);
 		for (int i=0; i<8; i++) {
-			result[i] = (byte)((fp >> (8*i)) & 0xff);
+			result[7-i] = (byte)((fp >> (8*i)) & 0xff);
 		}
 	}
 	
@@ -113,7 +113,7 @@ class MSNumpress {
 	) {
 		long fp = 0;
 		for (int i=0; i<8; i++) {
-			fp = fp | ((0xFFl & data[i]) << (8*i));
+			fp = fp | ((0xFFl & data[7-i]) << (8*i));
 		}
 		return Double.longBitsToDouble(fp);
 	}
