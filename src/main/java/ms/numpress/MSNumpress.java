@@ -56,7 +56,7 @@ public class MSNumpress {
 			
 		} else if (cvAccession.equals(ACC_NUMPRESS_SLOF)) {
 			double[] result 	= new double[dataSize / 2];
-			int nbrOfDoubles 	= MSNumpress.decodeSlof(data, dataSize, result);
+			MSNumpress.decodeSlof(data, dataSize, result);
 			return result;
 			
 		} else if (cvAccession.equals(ACC_NUMPRESS_PIC)) {
