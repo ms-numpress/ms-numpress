@@ -18,7 +18,7 @@
  */
 /*
 	==================== encodeInt ====================
-	Some of the encodings described below use a integer compression refered to simply as 
+	Some of the encodings described below use a integer compression referred to simply as 
 	
 	encodeInt()
  
@@ -55,7 +55,7 @@ namespace MSNumpress {
 	
 	/**
 	 * Encodes the doubles in data by first using a 
-	 *   - lossy conversion to a 4 byte 5 decimal fixed point repressentation
+	 *   - lossy conversion to a 4 byte 5 decimal fixed point representation
 	 *   - storing the residuals from a linear prediction after first to values
 	 *   - encoding by encodeInt (see above) 
 	 * 
@@ -67,7 +67,7 @@ namespace MSNumpress {
 	 *
 	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
 	 * @dataSize	number of doubles from *data to encode
-	 * @result		pointer to were resulting bytes should be stored
+	 * @result		pointer to where resulting bytes should be stored
 	 * @fixedPoint	the scaling factor used for getting the fixed point repr. 
 	 * 				This is stored in the binary and automatically extracted
 	 * 				on decoding.
@@ -96,10 +96,10 @@ namespace MSNumpress {
 	 * to be within +- 5e-6 of the original value.
 	 *
 	 * Further, values > ~42000 will also be truncated because of the
-	 * fixed point representation, so this scheme is stronly discouraged 
+	 * fixed point representation, so this scheme is strongly discouraged 
 	 * if values above might be above this size.
 	 *
-	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
 	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
@@ -154,7 +154,7 @@ namespace MSNumpress {
 	/**
 	 * Decodes data encoded by encodePic
 	 *
-	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
 	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
