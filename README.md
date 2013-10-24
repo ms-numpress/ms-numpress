@@ -82,4 +82,6 @@ Examples:
 License 
 -------
 
-This code is open source, under the Apache 2.0 license.
+This code is open source. By default code is licenses with the Apache 2.0 license. 
+If you for some reason prefer BSD, there is a version which is BSD 3-clause licensed 
+in the src/bsd directory.  
