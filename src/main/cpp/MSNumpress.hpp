@@ -63,7 +63,7 @@ namespace MSNumpress {
 	 * data is reasonably smooth on the first order.
 	 *
 	 * This encoding is suitable for typical m/z or retention time binary arrays. 
-	 * For masses above 100 m/z the encoding is accurate to at least 0.1 ppm.
+	 * On a test set, the encoding was empirically show to be accurate to at least 0.002 ppm.
 	 *
 	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
 	 * @dataSize	number of doubles from *data to encode
@@ -91,6 +91,7 @@ namespace MSNumpress {
 		double fixedPoint);
 
 	/**
+     * Decodes data encoded by encodeLinear. 
 	 * Decodes data encoded by encodeLinear. Note that the compression 
 	 * discard any information < 1e-5, so data is only guaranteed 
 	 * to be within +- 5e-6 of the original value.
@@ -120,7 +121,43 @@ namespace MSNumpress {
 	void decodeLinear(
 		const std::vector<unsigned char> &data,
 		std::vector<double> &result);
-
+		
+/////////////////////////////////////////////////////////////
+	
+	
+	/**
+	 * Encodes the doubles in data by storing the residuals from a linear prediction after first to values.
+	 * 
+	 * The resulting binary is the same size as the input data.
+	 *
+	 * This encoding is suitable for typical m/z or retention time binary arrays, and is
+	 * intended to be used before zlib compression to improve compression.
+	 *
+	 * @data		pointer to array of doubles to be encoded (need memorycont. repr.)
+	 * @dataSize	number of doubles from *data to encode
+	 * @result		pointer to were resulting bytes should be stored
+	 */
+	size_t encodeSafe(
+		const double *data, 
+		const size_t dataSize, 
+		unsigned char *result);
+	
+	
+	/**
+	 * Decodes data encoded by encodeSafe. 
+	 *
+	 * result vector is the same size as the input data.
+	 *
+	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
+	 * @dataSize	number of bytes from *data to decode
+	 * @result		pointer to were resulting doubles should be stored
+	 * @return		the number of decoded bytes or -1 if something went wrong.
+	 */
+	int decodeSafe(
+		const unsigned char *data,
+		const size_t dataSize,
+		double *result);
+	
 /////////////////////////////////////////////////////////////
 
 	/**

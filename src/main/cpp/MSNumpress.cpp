@@ -86,9 +86,9 @@ void encodeInt(
 		unsigned char* res,
 		size_t *res_length	
 ) {
-	int i, l, m;
-	int mask = 0xf0000000;
-	int init = x & mask;
+    int i, l, m;
+    unsigned int mask = 0xf0000000;
+    int init = x & mask;
 
 	if (init == 0) {
 		l = 8;
@@ -141,11 +141,11 @@ void decodeInt(
 		int *half,
 		int *res
 ) {
-	size_t n;
-	size_t i;
-	int mask, m;
-	unsigned char head;
-	unsigned char hb;
+    size_t n;
+    size_t i;
+    unsigned int mask, m;
+    unsigned char head;
+    unsigned char hb;
 
 	if (*half == 0) {
 		head = data[*di] >> 4;
@@ -397,6 +397,109 @@ void decodeLinear(
 	result.resize(dataSize * 2);
 	size_t decodedLength = decodeLinear(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
+}
+
+/////////////////////////////////////////////////////////////
+
+
+size_t encodeSafe(
+		const double *data, 
+		const size_t dataSize, 
+		unsigned char *result
+) {
+	size_t i, j, ri = 0;
+	double latest[3];
+	double extrapol, diff;
+	const unsigned char *fp; 
+	
+	//printf("d0 d1 d2 extrapol diff\n");
+		
+	if (dataSize == 0) return ri;
+
+	latest[1] = data[0];
+	fp = (unsigned char*)data;
+	for (i=0; i<8; i++) {
+		result[ri++] = fp[IS_BIG_ENDIAN ? (7-i) : i];
+	}
+	
+	if (dataSize == 1) return ri;
+
+	latest[2] = data[1];
+	fp = (unsigned char*)&(data[1]);
+	for (i=0; i<8; i++) {
+		result[ri++] = fp[IS_BIG_ENDIAN ? (7-i) : i];
+	}
+
+	fp = (unsigned char*)&diff;
+	for (i=2; i<dataSize; i++) {
+		latest[0] = latest[1];
+		latest[1] = latest[2];
+		latest[2] = data[i];
+		extrapol = latest[1] + (latest[1] - latest[0]);
+		diff = latest[2] - extrapol;
+		//printf("%f %f %f %f %f\n", latest[0], latest[1], latest[2], extrapol, diff);
+		for (j=0; j<8; j++) {
+			result[ri++] = fp[IS_BIG_ENDIAN ? (7-j) : j];
+		}
+	}
+	
+	return ri;
+}
+
+
+int decodeSafe(
+		const unsigned char *data,
+		const size_t dataSize,
+		double *result
+) {
+	size_t i, di, ri;
+	double extrapol, diff;
+	double latest[3];
+	unsigned char *fp;
+	
+	if (dataSize % 8 != 0) return -1;
+	
+	//printf("d0 d1 extrapol diff\td2\n");
+	
+	try {
+		fp = (unsigned char*)&(latest[1]);
+		for (i=0; i<8; i++) {
+			fp[i] = data[IS_BIG_ENDIAN ? (7-i) : i];
+		}
+		result[0] = latest[1];
+
+		if (dataSize == 8) return 1;
+
+		fp = (unsigned char*)&(latest[2]);
+		for (i=0; i<8; i++) {
+			fp[i] = data[8 + (IS_BIG_ENDIAN ? (7-i) : i)];
+		}
+		result[1] = latest[2];
+		
+		ri = 2;
+		
+		fp = (unsigned char*)&diff;
+		for (di = 16; di < dataSize; di += 8) {
+			latest[0] = latest[1];
+			latest[1] = latest[2];
+			
+			for (i=0; i<8; i++) {
+				fp[i] = data[di + (IS_BIG_ENDIAN ? (7-i) : i)];
+			}
+			
+			extrapol = latest[1] + (latest[1] - latest[0]);
+			latest[2] = extrapol + diff;
+			
+			//printf("%f %f %f %f\t%f \n", latest[0], latest[1], extrapol, diff, latest[2]);
+		
+			result[ri++] = latest[2];
+		}
+	} catch (...) {
+		cerr << "got some error" << endl;
+		return -1;
+	}
+	
+	return ri;
 }
 
 /////////////////////////////////////////////////////////////

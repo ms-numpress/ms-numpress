@@ -29,6 +29,7 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include <stdio.h>
 
 using std::cout;
 using std::endl;
@@ -196,6 +197,77 @@ void encodeDecodeLinearStraight() {
 	cout << "+           max error: " << m << "  limit: " << mLim << endl;
 	cout << "+ pass    encodeDecodeLinearStraight " << endl << endl;
 }
+
+
+
+void encodeDecodeSafeStraight() {
+	double error;
+	double eLim = 1.0e-300;
+	size_t n = 15;
+	double mzs[15];
+	for (int i=0; i<n; i++) 
+		mzs[i] = i+1;
+	
+	unsigned char encoded[8000];
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeSafe(&mzs[0], n, &encoded[0]);
+	
+	/*
+	printf("\n");
+	assert(encodedBytes == n*8);
+	for (size_t i=0; i<n; i++) { 
+		for (size_t j=0; j<8; j++) {
+			printf("%x ", encoded[i*8 + j]);
+		}
+		printf("\n");
+	}
+	*/
+	
+	double decoded[1000];
+	size_t numDecoded = ms::numpress::MSNumpress::decodeSafe(&encoded[0], encodedBytes, &decoded[0]);
+	
+	assert(numDecoded == n);
+	for (int i=0; i<n; i++) { 
+		error = abs(mzs[i] - decoded[i]);
+		if (error >= eLim) {
+			cout << "error   " << error << " is non-zero ( >= " << eLim << " )" << endl;
+			assert(error == 0);
+		}
+	}
+	cout << "+ pass    encodeDecodeSafeStraight " << endl << endl;
+}
+
+
+
+void encodeDecodeSafe() {
+	srand(123459);
+	
+	double error;
+	double eLim = 1.0e-300;
+	size_t n = 1000;
+	double mzs[1000];
+	mzs[0] = 300 + rand() / double(RAND_MAX);
+	for (int i=1; i<n; i++) 
+		mzs[i] = mzs[i-1] + rand() / double(RAND_MAX);
+	
+	unsigned char encoded[8000];
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeSafe(&mzs[0], n, &encoded[0]);
+	
+	assert(encodedBytes == n*8);
+	
+	double decoded[1000];
+	size_t numDecoded = ms::numpress::MSNumpress::decodeSafe(&encoded[0], encodedBytes, &decoded[0]);
+	
+	assert(numDecoded == n);
+	for (int i=0; i<n; i++) { 
+		error = abs(mzs[i] - decoded[i]);
+		if (error >= eLim) {
+			cout << "error   " << error << " is non-zero ( >= " << eLim << " )" << endl;
+			assert(error == 0);
+		}
+	}
+	cout << "+ pass    encodeDecodeSafe " << endl << endl;
+}
+		
 
 
 void encodeDecodeLinear() {
@@ -468,6 +540,8 @@ int main(int argc, const char* argv[]) {
 	encodeDecodeLinearStraight();
 	encodeDecodeLinear();
 	encodeDecodePic();
+	encodeDecodeSafeStraight();
+	encodeDecodeSafe();
 	optimalSlofFixedPoint();
 	encodeDecodeSlof();
 	encodeDecodeLinear5();
