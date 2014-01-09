@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Ms-numpress by fickludd</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Ms-numpress</h1>
+        <p>Implementations of two compression schemes for numeric data found from mass spectrometers.  </p>
+
+        <p class="view"><a href="https://github.com/fickludd/ms-numpress">View the Project on GitHub <small>fickludd/ms-numpress</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/fickludd/ms-numpress/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/fickludd/ms-numpress/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/fickludd/ms-numpress">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="ms-numpress" class="anchor" href="#ms-numpress"><span class="octicon octicon-link"></span></a>MS Numpress</h1>
+
+<p>Implementations of two compression schemes for numeric data from mass spectrometers.</p>
+
+<p>The library provides implementations of 3 different algorithms, 
+1 designed to compress first order smooth data like retention 
+time or M/Z arrays, and 2 for compressing non smooth data with
+lower requirements on precision like ion count arrays.</p>
+
+<p>Implementations and unit test are provided in <code>c++</code> and <code>java</code>.</p>
+
+<h2>
+<a name="numpress-pic" class="anchor" href="#numpress-pic"><span class="octicon octicon-link"></span></a>Numpress Pic</h2>
+
+<h3>
+<a name="ms-numpress-positive-integer-compression" class="anchor" href="#ms-numpress-positive-integer-compression"><span class="octicon octicon-link"></span></a>MS Numpress positive integer compression</h3>
+
+<p>Intended for ion count data, this compression simply rounds values 
+to the nearest integer, and stores these integers in a truncated 
+form which is effective for values relatively close to zero. </p>
+
+<h2>
+<a name="numpress-slof" class="anchor" href="#numpress-slof"><span class="octicon octicon-link"></span></a>Numpress Slof</h2>
+
+<h3>
+<a name="ms-numpress-short-logged-float-compression" class="anchor" href="#ms-numpress-short-logged-float-compression"><span class="octicon octicon-link"></span></a>MS Numpress short logged float compression</h3>
+
+<p>Also targeting ion count data, this compression takes the natural
+logarithm of values, multiplies by a scaling factor and rounds to 
+the nearest integer. For typical ion count dynamic range these values 
+fits into two byte integers, so only the two least significant bytes 
+of the integer are stored.</p>
+
+<p>The scaling factor can be chosen manually, but the library also contains
+a function for retrieving the optimal Slof scaling factor for a given data array.
+Since the scaling factor is variable, it is stored as a regular double 
+precision float first in the encoding, and automatically parsed during decoding.</p>
+
+<h2>
+<a name="numpress-lin" class="anchor" href="#numpress-lin"><span class="octicon octicon-link"></span></a>Numpress Lin</h2>
+
+<h3>
+<a name="ms-numpress-linear-prediction-compression" class="anchor" href="#ms-numpress-linear-prediction-compression"><span class="octicon octicon-link"></span></a>MS Numpress linear prediction compression</h3>
+
+<p>This compression uses a fixed point repressentation, achieve by 
+multiplication by a scaling factor and rounding to the nearest integer. 
+To exploit the assumed linearity of the data, linear prediction is 
+then used in the following way. </p>
+
+<p>The first to values are stored without compression as 4 byte integers.
+For each following value a linear predicion is made from the two previous
+values:</p>
+
+<pre><code>Xpred   = (X(n) - X(n-1)) + X(n)
+Xres    = Xpred - X(n+1)
+</code></pre>
+
+<p>The residual <code>Xres</code> is then stored, using the same truncated integer 
+representation as in Numpress Pic.  </p>
+
+<p>The scaling factor can be chosen manually, but the library also contains
+a function for retrieving the optimal Lin scaling factor for a given data array.
+Since the scaling factor is variable, it is stored as a regular double 
+precision float first in the encoding, and automatically parsed during decoding.</p>
+
+<h2>
+<a name="truncated-integer-representation-" class="anchor" href="#truncated-integer-representation-"><span class="octicon octicon-link"></span></a>Truncated integer representation </h2>
+
+<p>This encoding works on a 4 byte integer, by truncating initial zeros or ones.
+If the initial (most significant) half byte is 0x0 or 0xf, the number of such 
+halfbytes starting from the most significant is stored in a halfbyte. This initial 
+count is then followed by the rest of the ints halfbytes, in little-endian order. 
+A count halfbyte c of</p>
+
+<pre><code>0 &lt;= c &lt;= 8         is interpreted as an initial c      0x0 halfbytes
+9 &lt;= c &lt;= 15        is interpreted as an initial (c-8)  0xf halfbytes
+</code></pre>
+
+<p>Examples:</p>
+
+<pre><code>int     c       rest
+0   =&gt;  0x8
+-1  =&gt;  0xf     0xf
+23  =&gt;  0x6     0x7 0x1
+</code></pre>
+
+<h2>
+<a name="license-" class="anchor" href="#license-"><span class="octicon octicon-link"></span></a>License </h2>
+
+<p>This code is open source. By default code is licenses with the Apache 2.0 license. 
+If you for some reason prefer BSD, there is a version which is BSD 3-clause licensed 
+in the src/bsd directory.  </p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/fickludd">fickludd</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
