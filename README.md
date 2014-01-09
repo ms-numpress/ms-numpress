@@ -10,6 +10,8 @@ lower requirements on precision like ion count arrays.
 
 Implementations and unit test are provided in `c++` and `java`.
 
+For `c++`, run tests by  
+
 Numpress Pic
 ------------
 ### MS Numpress positive integer compression
