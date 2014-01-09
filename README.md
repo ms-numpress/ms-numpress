@@ -10,7 +10,18 @@ lower requirements on precision like ion count arrays.
 
 Implementations and unit test are provided in `c++` and `java`.
 
-For `c++`, run tests by  
+### C++ library tests
+
+For `c++`, move to `src/main/cpp` and compile and run tests (on LINUX) with
+
+	g++ MSNumpress.cpp MSNumpressTest.cpp -o test && ./test
+
+### Java (maven) library tests
+
+Ensure that maven (2.2+) is installed. Then, in this directory, run
+
+	mvn test
+
 
 Numpress Pic
 ------------
