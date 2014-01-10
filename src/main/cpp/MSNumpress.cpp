@@ -138,7 +138,8 @@ void encodeInt(
 void decodeInt(
 		const unsigned char *data,
 		size_t *di,
-		int *half,
+		size_t max_di,
+		size_t *half,
 		int *res
 ) {
     size_t n;
@@ -170,6 +171,10 @@ void decodeInt(
 	
 	if (n == 8) {
 		return;
+	}
+	
+	if (*di + ((8 - n) - (1 - *half)) / 2 >= max_di) {
+		throw "[MSNumpress::decodeInt] Corrupt input data! ";
 	}
 	
 	for (i=n; i<8; i++) {
@@ -308,7 +313,7 @@ size_t decodeLinear(
 	long long ints[3];
 	//double d;
 	size_t di;
-	int half;
+	size_t half;
 	long long extrapol;
 	long long y;
 	double fixedPoint;
@@ -322,7 +327,7 @@ size_t decodeLinear(
 
 	if (dataSize < 12) return -1;
 	
-	try {
+	//try {
 		ints[1] = 0;
 		for (i=0; i<4; i++) {
 			ints[1] = ints[1] | ((0xff & (init = data[8+i])) << (i*8));
@@ -342,23 +347,27 @@ size_t decodeLinear(
 		ri = 2;
 		di = 16;
 		
+		//printf("   di     ri      half    int[0]    int[1]    extrapol   diff\n");
+		
 		while (di < dataSize) {
-			ints[0] = ints[1];
-			ints[1] = ints[2];
 			if (di == (dataSize - 1) && half == 1) {
-				if ((data[di] & 0xf) != 0x8) {
+				if ((data[di] & 0xf) == 0x0) {
 					break;
 				}
 			}
-			decodeInt(data, &di, &half, &diff);
+			//printf("%7d %7d %7d %lu %lu %ld", di, ri, half, ints[0], ints[1], extrapol);
+			
+			ints[0] = ints[1];
+			ints[1] = ints[2];
+			decodeInt(data, &di, dataSize, &half, &diff);
 			
 			extrapol = ints[1] + (ints[1] - ints[0]);
 			y = extrapol + diff;
-			//printf("%lu %lu,   extrapol: %ld    diff: %d \n", ints[0], ints[1], extrapol, diff);
+			//printf(" %d \n", diff);
 			result[ri++] 	= y / fixedPoint;
 			ints[2] 		= y;
 		}
-	} catch (...) {
+	/*} catch (...) {
 		cerr << "DECODE ERROR" << endl;
 		cerr << "i: " << i << endl;
 		cerr << "ri: " << ri << endl;
@@ -374,7 +383,7 @@ size_t decodeLinear(
 		}
 		cerr << endl;
 	}
-	
+	*/
 	return ri;
 }
 
@@ -564,25 +573,30 @@ size_t decodePic(
 	int count;
 	//double d;
 	size_t di;
-	int half;
+	size_t half;
 
-	try {
+	//printf("ri      di      half    dSize   count\n");
+	
+	//try {
 		half = 0;
 		ri = 0;
 		di = 0;
 		
 		while (di < dataSize) {
 			if (di == (dataSize - 1) && half == 1) {
-				if ((data[di] & 0xf) != 0x8) {
+				if ((data[di] & 0xf) == 0x0) {
 					break;
 				}
 			}
-			decodeInt(&data[0], &di, &half, &count);
+			
+			decodeInt(&data[0], &di, dataSize, &half, &count);
+			
+			//printf("%7d %7d %7d %7d %7d\n", ri, di, half, dataSize, count);
 			
 			//printf("count: %d \n", count);
 			result[ri++] 	= count;
 		}
-	} catch (...) {
+	/*} catch (...) {
 		cerr << "DECODE ERROR" << endl;
 		cerr << "ri: " << ri << endl;
 		cerr << "di: " << di << endl;
@@ -594,7 +608,7 @@ size_t decodePic(
 			cerr << "data[" << i << "] = " << data[i];
 		}
 		cerr << endl;
-	}
+	}*/
 	return ri;
 }
 

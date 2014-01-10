@@ -530,6 +530,33 @@ void encodeDecodeSlof5() {
 }
 
 
+
+void testErroneousDecodePic() {
+	std::vector<double> result;
+
+	// set data to [  100, 102, 140, 92, 33, 80, 145  ]; // Base64 is "ZGaMXCFQkQ=="
+	std::vector<unsigned char> data;
+	data.resize(32);
+	data[0] = 100;
+	data[0] = 102;
+	data[0] = 140;
+	data[0] = 92;
+	data[0] = 33;
+	data[0] = 80;
+	data[0] = 145;
+
+	try {
+		ms::numpress::MSNumpress::decodePic(data, result);
+		cout << "- fail    testErroneousDecodePic: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		
+	}
+	
+	cout << "+ pass    testErroneousDecodePic " << endl << endl;
+}
+
+
 int main(int argc, const char* argv[]) {
 	optimalLinearFixedPoint();
 	encodeLinear1();
@@ -547,6 +574,7 @@ int main(int argc, const char* argv[]) {
 	encodeDecodeLinear5();
 	encodeDecodePic5();
 	encodeDecodeSlof5();
+	testErroneousDecodePic();
 	
 	cout << "=== all tests succeeded! ===" << endl;
 	return 0;

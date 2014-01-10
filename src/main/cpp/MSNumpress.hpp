@@ -198,9 +198,10 @@ namespace MSNumpress {
 	 * @result		pointer to were resulting doubles should be stored
 	 * @return		the number of decoded doubles
 	 */
-	void decodePic(
-		const std::vector<unsigned char> &data,
-		std::vector<double> &result);
+	size_t decodePic(
+		const unsigned char *data,
+		const size_t dataSize,
+		double *result);
 	
 	/**
 	 * Calls lower level decodePic while handling vector sizes appropriately
@@ -208,10 +209,9 @@ namespace MSNumpress {
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
 	 */
-	size_t decodePic(
-		const unsigned char *data,
-		const size_t dataSize,
-		double *result);
+	void decodePic(
+		const std::vector<unsigned char> &data,
+		std::vector<double> &result);
 
 /////////////////////////////////////////////////////////////
 
