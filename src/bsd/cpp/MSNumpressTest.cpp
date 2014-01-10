@@ -552,12 +552,12 @@ void testErroneousDecodePic() {
 	std::vector<unsigned char> data;
 	data.resize(32);
 	data[0] = 100;
-	data[0] = 102;
-	data[0] = 140;
-	data[0] = 92;
-	data[0] = 33;
-	data[0] = 80;
-	data[0] = 145;
+	data[1] = 102;
+	data[2] = 140;
+	data[3] = 92;
+	data[4] = 33;
+	data[5] = 80;
+	data[6] = 145;
 
 	try {
 		ms::numpress::MSNumpress::decodePic(data, result);
