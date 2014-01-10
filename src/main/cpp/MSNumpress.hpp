@@ -92,15 +92,12 @@ namespace MSNumpress {
 
 	/**
      * Decodes data encoded by encodeLinear. 
-	 * Decodes data encoded by encodeLinear. Note that the compression 
-	 * discard any information < 1e-5, so data is only guaranteed 
-	 * to be within +- 5e-6 of the original value.
-	 *
-	 * Further, values > ~42000 will also be truncated because of the
-	 * fixed point representation, so this scheme is strongly discouraged 
-	 * if values above might be above this size.
 	 *
 	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
+	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
+	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
@@ -114,6 +111,10 @@ namespace MSNumpress {
 	
 	/**
 	 * Calls lower level decodeLinear while handling vector sizes appropriately
+	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
+	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
@@ -191,7 +192,11 @@ namespace MSNumpress {
 	/**
 	 * Decodes data encoded by encodePic
 	 *
-	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter of equal to twice the data length (in nbr of values)
+	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
+	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
@@ -205,6 +210,10 @@ namespace MSNumpress {
 	
 	/**
 	 * Calls lower level decodePic while handling vector sizes appropriately
+	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
+	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
@@ -224,10 +233,7 @@ namespace MSNumpress {
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
 	 * 
-	 * unsigned short fp = log(d + 1) * 3000.0 + 0.5
-	 *
-	 * Note that this fixed point will mean any d < 0.00016667 will be 
-	 * stored as a zero and mapped back to a zero. 
+	 * unsigned short fp = log(d + 1) * fixedPoint + 0.5
 	 *
 	 * result vector is exactly twice the data length (in nbr of values)
 	 *
