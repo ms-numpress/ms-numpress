@@ -84,21 +84,6 @@ void encodeLinear() {
 }
 
 
-void decodeLinearFaulty() {
-	unsigned char encoded[20];
-	double decoded[4];
-	
-	size_t numDecoded;
-	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 11, &decoded[0]);
-	assert(-1 == numDecoded);
-	
-	numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 14, &decoded[0]);
-	assert(-1 == numDecoded);
-	
-	cout << "+ pass    decodeLinearFaulty " << endl << endl;
-}
-
-
 void decodeLinearNice() {
 	
 	double mzs[4];
@@ -146,6 +131,58 @@ void decodeLinearWierd() {
 	assert(abs(0.00010 - decoded[3]) < 0.000005);
 	
 	cout << "+ pass    decodeLinearWierd " << endl << endl;
+}
+
+
+void decodeLinearCorrupt1() {
+	unsigned char encoded[20];
+	double decoded[4];
+	
+	size_t numDecoded;
+	try {
+		numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 11, &decoded[0]);
+		cout << "- fail    decodeLinearCorrupt1: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		
+	}
+	
+	try {
+		numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 14, &decoded[0]);
+		cout << "- fail    decodeLinearCorrupt1: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		
+	}
+	
+	cout << "+ pass    decodeLinearCorrupt 1 " << endl << endl;
+}
+
+
+void decodeLinearCorrupt2() {
+	
+	double mzs[4];
+	
+	mzs[0] = 100.0;
+	mzs[1] = 200.0;
+	mzs[2] = 300.00005;
+	mzs[3] = 0.00010;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], nMzs);
+	size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], fixedPoint);
+	
+	double decoded[4];
+	try {
+		size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes-1, &decoded[0]);
+		cout << "- fail    decodeLinearCorrupt2: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		
+	}
+	
+	cout << "+ pass    decodeLinearCorrupt 2 " << endl << endl;
 }
 
 
@@ -561,9 +598,10 @@ int main(int argc, const char* argv[]) {
 	optimalLinearFixedPoint();
 	encodeLinear1();
 	encodeLinear();
-	decodeLinearFaulty();
 	decodeLinearNice();
 	decodeLinearWierd();
+	decodeLinearCorrupt1();
+	decodeLinearCorrupt2();
 	encodeDecodeLinearStraight();
 	encodeDecodeLinear();
 	encodeDecodePic();

@@ -320,12 +320,14 @@ size_t decodeLinear(
 	
 	//printf("Decoding %d bytes with fixed point %f\n", (int)dataSize, fixedPoint);
 
-	if (dataSize < 8) return -1;
+	if (dataSize < 8) 
+		throw "[MSNumpress::decodeLinear] Corrupt input data: not enough bytes to read fixed point! ";
 	
 	fixedPoint = decodeFixedPoint(data);
 
 
-	if (dataSize < 12) return -1;
+	if (dataSize < 12) 
+		throw "[MSNumpress::decodeLinear] Corrupt input data: not enough bytes to read first value! ";
 	
 	//try {
 		ints[1] = 0;
@@ -335,7 +337,8 @@ size_t decodeLinear(
 		result[0] = ints[1] / fixedPoint;
 
 		if (dataSize == 12) return 1;
-		if (dataSize < 16) return -1;
+		if (dataSize < 16) 
+			throw "[MSNumpress::decodeLinear] Corrupt input data: not enough bytes to read second value! ";
 
 		ints[2] = 0;
 		for (i=0; i<4; i++) {
@@ -466,7 +469,8 @@ int decodeSafe(
 	double latest[3];
 	unsigned char *fp;
 	
-	if (dataSize % 8 != 0) return -1;
+	if (dataSize % 8 != 0) 
+		throw "[MSNumpress::decodeSafe] Corrupt input data: number of bytes needs to be multiple of 8! ";
 	
 	//printf("d0 d1 extrapol diff\td2\n");
 	
@@ -691,7 +695,9 @@ size_t decodeSlof(
 	ri = 0;
 	double fixedPoint;
 
-	if (dataSize < 8) return -1;
+	if (dataSize < 8) 
+		throw "[MSNumpress::decodeSlof] Corrupt input data: not enough bytes to read fixed point! ";
+	
 	fixedPoint = decodeFixedPoint(data);
 
 	for (i=8; i<dataSize; i+=2) {

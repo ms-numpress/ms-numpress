@@ -262,6 +262,8 @@ namespace MSNumpress {
 	/**
 	 * Decodes data encoded by encodeSlof
 	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt.
+	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
 	 * @result		pointer to were resulting doubles should be stored
@@ -274,6 +276,8 @@ namespace MSNumpress {
 	
 	/**
 	 * Calls lower level decodeSlof while handling vector sizes appropriately
+	 *
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt.
 	 *
 	 * @data		vector of bytes to be decoded
 	 * @result		vector of resulting double (will be resized to the number of doubles)
