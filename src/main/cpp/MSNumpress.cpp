@@ -713,7 +713,7 @@ void encodeSlof(
 		double fixedPoint
 ) {
 	size_t dataSize = data.size();
-	result.resize(dataSize * 2);
+	result.resize(dataSize * 2 + 8);
 	size_t encodedLength = encodeSlof(&data[0], dataSize, &result[0], fixedPoint);
 	result.resize(encodedLength);
 }
