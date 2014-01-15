@@ -51,13 +51,13 @@ Numpress Lin
 ------------
 ### MS Numpress linear prediction compression
 
-This compression uses a fixed point repressentation, achieve by 
+This compression uses a fixed point representation, achieve by 
 multiplication by a scaling factor and rounding to the nearest integer. 
 To exploit the assumed linearity of the data, linear prediction is 
 then used in the following way. 
 
-The first to values are stored without compression as 4 byte integers.
-For each following value a linear predicion is made from the two previous
+The first two values are stored without compression as 4 byte integers.
+For each following value a linear prediction is made from the two previous
 values:
 
 	Xpred 	= (X(n) - X(n-1)) + X(n)
@@ -95,6 +95,7 @@ Examples:
 License 
 -------
 
-This code is open source. By default code is licenses with the Apache 2.0 license. 
-If you for some reason prefer BSD, there is a version which is BSD 3-clause licensed 
-in the src/bsd directory.  
+This code is open source. It is dual licenced under the Apache 2.0 license as
+well as the 3-clause BSD licence. See the LICENCE-BSD and the LICENCE-APACHE
+file for the licences.
+

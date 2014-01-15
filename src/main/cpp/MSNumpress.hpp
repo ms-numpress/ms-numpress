@@ -56,7 +56,7 @@ namespace MSNumpress {
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point representation
-	 *   - storing the residuals from a linear prediction after first to values
+	 *   - storing the residuals from a linear prediction after first two values
 	 *   - encoding by encodeInt (see above) 
 	 * 
 	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
@@ -95,7 +95,7 @@ namespace MSNumpress {
 	 *
 	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
 	 *
-	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e.
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
 	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
@@ -112,7 +112,7 @@ namespace MSNumpress {
 	/**
 	 * Calls lower level decodeLinear while handling vector sizes appropriately
 	 *
-	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e..
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
 	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
@@ -127,7 +127,7 @@ namespace MSNumpress {
 	
 	
 	/**
-	 * Encodes the doubles in data by storing the residuals from a linear prediction after first to values.
+	 * Encodes the doubles in data by storing the residuals from a linear prediction after first two values.
 	 * 
 	 * The resulting binary is the same size as the input data.
 	 *
@@ -194,7 +194,7 @@ namespace MSNumpress {
 	 *
 	 * result vector guaranteed to be shorter of equal to twice the data length (in nbr of values)
 	 *
-	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e.
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
 	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
@@ -211,7 +211,7 @@ namespace MSNumpress {
 	/**
 	 * Calls lower level decodePic while handling vector sizes appropriately
 	 *
-	 * Note that this method may throw a const char* if it deems the input data to be corrupt, ei.
+	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e.
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
 	 * int need to use either the last halfbyte, or the second last followed by a 0x0 halfbyte. 
 	 *
