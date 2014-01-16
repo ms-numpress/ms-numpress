@@ -33,6 +33,8 @@ using std::max;
 using std::abs;
 
 
+// This is only valid on systems were ints use more bytes than chars...
+
 const int ONE = 1;
 bool is_big_endian() {
 	return *((char*)&(ONE)) == 1;
