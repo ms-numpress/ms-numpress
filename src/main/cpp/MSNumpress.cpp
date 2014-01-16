@@ -392,7 +392,7 @@ void encodeLinear(
 		double fixedPoint
 ) {
 	size_t dataSize = data.size();
-	result.resize(dataSize * 5);
+	result.resize(dataSize * 5 + 8);
 	size_t encodedLength = encodeLinear(&data[0], dataSize, &result[0], fixedPoint);
 	result.resize(encodedLength);
 }
@@ -402,7 +402,7 @@ void decodeLinear(
 		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
-	result.resize(dataSize * 2);
+	result.resize((dataSize - 8) * 2);
 	size_t decodedLength = decodeLinear(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
@@ -721,7 +721,7 @@ void decodeSlof(
 		std::vector<double> &result
 ) {
 	size_t dataSize = data.size();
-	result.resize(dataSize / 2);
+	result.resize((dataSize - 8) / 2);
 	size_t decodedLength = decodeSlof(&data[0], dataSize, &result[0]);
 	result.resize(decodedLength);
 }
