@@ -59,7 +59,7 @@ namespace MSNumpress {
 	 *   - storing the residuals from a linear prediction after first two values
 	 *   - encoding by encodeInt (see above) 
 	 * 
-	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
+	 * The resulting binary is maximally 8 + dataSize * 5 bytes, but much less if the 
 	 * data is reasonably smooth on the first order.
 	 *
 	 * This encoding is suitable for typical m/z or retention time binary arrays. 

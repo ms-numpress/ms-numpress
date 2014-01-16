@@ -197,13 +197,13 @@ public class MSNumpress {
 	 *   - storing the residuals from a linear prediction after first to values
 	 *   - encoding by encodeInt (see above) 
 	 * 
-	 * The resulting binary is maximally dataSize * 5 bytes, but much less if the 
+	 * The resulting binary is maximally 8 + dataSize * 5 bytes, but much less if the 
 	 * data is reasonably smooth on the first order.
 	 *
 	 * This encoding is suitable for typical m/z or retention time binary arrays. 
-	 * For masses above 100 m/z the encoding is accurate to at least 0.1 ppm.
+	 * On a test set, the encoding was empirically show to be accurate to at least 0.002 ppm.
 	 *
-	 * @data		array of double to be encoded
+	 * @data		array of doubles to be encoded
 	 * @dataSize	number of doubles from data to encode
 	 * @result		array were resulting bytes should be stored
 	 * @fixedPoint	the scaling factor used for getting the fixed point repr. 
@@ -272,16 +272,14 @@ public class MSNumpress {
 	
 	
 	/**
-	 * Decodes data encoded by encodeLinear. Note that the compression 
-	 * discard any information < 1e-5, so data is only guaranteed 
-	 * to be within +- 5e-6 of the original value.
+     * Decodes data encoded by encodeLinear. 
 	 *
-	 * Further, values > ~42000 will also be truncated because of the
-	 * fixed point representation, so this scheme is stronly discouraged 
-	 * if values above might be above this size.
+	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
 	 *
-	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
-	 * returns the number of doubles read
+	 * Note that this method may throw a ArrayIndexOutOfBoundsException if it deems the input data to 
+	 * be corrupt, i.e. that the last encoded int does not use the last byte in the data. In addition 
+	 * the last encoded int need to use either the last halfbyte, or the second last followed by a 
+	 * 0x0 halfbyte. 
 	 *
 	 * @data		array of bytes to be decoded
 	 * @dataSize	number of bytes from data to decode
@@ -392,6 +390,11 @@ public class MSNumpress {
 	 *
 	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
 	 *
+	 * Note that this method may throw a ArrayIndexOutOfBoundsException if it deems the input data to 
+	 * be corrupt, i.e. that the last encoded int does not use the last byte in the data. In addition 
+	 * the last encoded int need to use either the last halfbyte, or the second last followed by a 
+	 * 0x0 halfbyte. 
+	 *
 	 * @data		array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from data to decode
 	 * @result		array were resulting doubles should be stored
@@ -446,7 +449,9 @@ public class MSNumpress {
 	 * Encodes ion counts by taking the natural logarithm, and storing a
 	 * fixed point representation of this. This is calculated as
 	 * 
-	 * unsigned short fp = log(d) * fixedPoint + 0.5
+	 * unsigned short fp = log(d+1) * fixedPoint + 0.5
+	 *
+	 * the result vector is exactly 8 + 2 * |data| long (in nbr of values)
 	 *
 	 * @data		array of doubles to be encoded
 	 * @dataSize	number of doubles from data to encode
@@ -480,8 +485,8 @@ public class MSNumpress {
 	/**
 	 * Decodes data encoded by encodeSlof
 	 *
-	 * result vector length is twice the data length
-	 * returns the number of doubles read
+	 * result vector length is (|data| - 8) / 2
+	 * returns the number of doubles read, or -1 is there is a problem decoding.
 	 *
 	 * @data		array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from data to decode
@@ -498,6 +503,8 @@ public class MSNumpress {
 		
 		if (dataSize < 8) return -1;
 		double fixedPoint = decodeFixedPoint(data);	
+		
+		if (dataSize % 2 != 0) return -1;
 		
 		for (int i=8; i<dataSize; i+=2) {
 			x = (0xff & data[i]) | ((0xff & data[i+1]) << 8);

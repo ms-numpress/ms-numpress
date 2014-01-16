@@ -19,7 +19,8 @@
  package ms.numpress;
 
 /**
- * Decodes ints from the half bytes in bytes. Lossless reverse of encodeInt 
+ * Decodes ints from the half bytes in bytes. Lossless reverse of encodeInt, 
+ * although not symmetrical in input arguments. 
  */
 class IntDecoder {
 	
