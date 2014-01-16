@@ -8,12 +8,12 @@ The library provides implementations of 3 different algorithms,
 time or M/Z arrays, and 2 for compressing non smooth data with
 lower requirements on precision like ion count arrays.
 
-Implementations and unit test are provided in `c++` and `java`, for Python
+Implementations and unit test are provided in C++ and Java, for Python
 bindings exist.
 
 ### C++ library tests
 
-For `c++`, move to `src/main/cpp` and compile and run tests (on LINUX) with
+For C++, move to `src/main/cpp` and compile and run tests (on LINUX) with
 
 	g++ MSNumpress.cpp MSNumpressTest.cpp -o test && ./test
 
@@ -28,8 +28,8 @@ Ensure that maven (2.2+) is installed. Then, in this directory, run
 Ensure that Cython and the Python headers are installed on your system. Then
 move to `src/main/python` and compile and run tests (on LINUX) with
 
-  python setup.py build_ext --inplace
-  nosetests test_pymsnumpress.py  
+	python setup.py build_ext --inplace 
+	nosetests test_pymsnumpress.py  
 
 Numpress Pic
 ------------
