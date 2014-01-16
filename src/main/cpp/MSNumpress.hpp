@@ -93,7 +93,7 @@ namespace MSNumpress {
 	/**
      * Decodes data encoded by encodeLinear. 
 	 *
-	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter or equal to (|data| - 8) * 2
 	 *
 	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e.
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
@@ -192,7 +192,7 @@ namespace MSNumpress {
 	/**
 	 * Decodes data encoded by encodePic
 	 *
-	 * result vector guaranteed to be shorter of equal to twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter of equal to |data| * 2
 	 *
 	 * Note that this method may throw a const char* if it deems the input data to be corrupt, i.e.
 	 * that the last encoded int does not use the last byte in the data. In addition the last encoded 
@@ -235,7 +235,7 @@ namespace MSNumpress {
 	 * 
 	 * unsigned short fp = log(d + 1) * fixedPoint + 0.5
 	 *
-	 * result vector is exactly twice the data length (in nbr of values)
+	 * the result vector is exactly |data| * 2 + 8 bytes long
 	 *
 	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
 	 * @dataSize	number of doubles from *data to encode
@@ -261,6 +261,8 @@ namespace MSNumpress {
 
 	/**
 	 * Decodes data encoded by encodeSlof
+	 *
+	 * The return will include exactly (|data| - 8) / 2 doubles.
 	 *
 	 * Note that this method may throw a const char* if it deems the input data to be corrupt.
 	 *

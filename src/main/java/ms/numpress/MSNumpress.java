@@ -274,7 +274,7 @@ public class MSNumpress {
 	/**
      * Decodes data encoded by encodeLinear. 
 	 *
-	 * result vector guaranteed to be shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter or equal to (|data| - 8) * 2
 	 *
 	 * Note that this method may throw a ArrayIndexOutOfBoundsException if it deems the input data to 
 	 * be corrupt, i.e. that the last encoded int does not use the last byte in the data. In addition 
@@ -388,7 +388,7 @@ public class MSNumpress {
 	/**
 	 * Decodes data encoded by encodePic
 	 *
-	 * result vector guaranteedly shorter than twice the data length (in nbr of values)
+	 * result vector guaranteed to be shorter of equal to |data| * 2
 	 *
 	 * Note that this method may throw a ArrayIndexOutOfBoundsException if it deems the input data to 
 	 * be corrupt, i.e. that the last encoded int does not use the last byte in the data. In addition 
@@ -451,7 +451,7 @@ public class MSNumpress {
 	 * 
 	 * unsigned short fp = log(d+1) * fixedPoint + 0.5
 	 *
-	 * the result vector is exactly 8 + 2 * |data| long (in nbr of values)
+	 * the result vector is exactly |data| * 2 + 8 bytes long
 	 *
 	 * @data		array of doubles to be encoded
 	 * @dataSize	number of doubles from data to encode
@@ -485,7 +485,7 @@ public class MSNumpress {
 	/**
 	 * Decodes data encoded by encodeSlof
 	 *
-	 * result vector length is (|data| - 8) / 2
+	 * The result vector will be exactly (|data| - 8) / 2 doubles.
 	 * returns the number of doubles read, or -1 is there is a problem decoding.
 	 *
 	 * @data		array of bytes to be decoded (need memorycont. repr.)
