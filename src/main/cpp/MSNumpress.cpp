@@ -542,7 +542,7 @@ size_t encodePic(
 		*/
 		
 		for (hbi=1; hbi < halfByteCount; hbi+=2) {
-			result[ri] = (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf);
+			result[ri] = static_cast<unsigned char>( (halfBytes[hbi-1] << 4) | (halfBytes[hbi] & 0xf) );
 			//printf("%x \n", result[ri]);
 			ri++;
 		}
@@ -554,7 +554,7 @@ size_t encodePic(
 		}
 	}
 	if (halfByteCount == 1) {
-		result[ri] = halfBytes[0] << 4;
+		result[ri] = static_cast<unsigned char>( halfBytes[0] << 4 );
 		ri++;
 	}
 	return ri;
