@@ -672,7 +672,7 @@ size_t encodeSlof(
 
 	ri = 8;
 	for (i=0; i<dataSize; i++) {
-		x = log(data[i]+1) * fixedPoint + 0.5;
+		x = static_cast<unsigned short>(log(data[i]+1) * fixedPoint + 0.5);
 		result[ri++] = x & 0xff;
 		result[ri++] = x >> 8;
 	}
@@ -697,7 +697,7 @@ size_t decodeSlof(
 	fixedPoint = decodeFixedPoint(data);
 
 	for (i=8; i<dataSize; i+=2) {
-		x = data[i] | (data[i+1] << 8);
+		x = static_cast<unsigned short>(data[i] | (data[i+1] << 8));
 		result[ri++] = exp(x / fixedPoint) - 1;
 	}
 	return ri;
