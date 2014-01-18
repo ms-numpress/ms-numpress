@@ -522,7 +522,8 @@ size_t encodePic(
 		size_t dataSize, 
 		unsigned char *result
 ) {
-	size_t i, ri, count;
+	size_t i, ri;
+	int count;
 	unsigned char halfBytes[10];
 	size_t halfByteCount;
 	size_t hbi;
@@ -533,7 +534,7 @@ size_t encodePic(
 	ri = 0;
 
 	for (i=0; i<dataSize; i++) {
-		count = data[i] + 0.5;
+		count = static_cast<int>(data[i] + 0.5);
 		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
 		encodeInt(count, &halfBytes[halfByteCount], &halfByteCount);
 		/*
