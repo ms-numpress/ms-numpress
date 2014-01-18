@@ -44,6 +44,12 @@
 #include <cstddef>
 #include <vector>
 
+// defines whether to throw an exception when a number cannot be encoded safely
+// with the given parameters
+#ifndef THROW_ON_OVERFLOW
+#define THROW_ON_OVERFLOW true
+#endif
+
 namespace ms {
 namespace numpress {
 

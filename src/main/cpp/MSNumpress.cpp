@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <climits>
 #include "MSNumpress.hpp"
 
 namespace ms {
@@ -31,7 +32,6 @@ using std::endl;
 using std::min;
 using std::max;
 using std::abs;
-
 
 const int ONE = 1;
 static bool is_big_endian() {
@@ -248,6 +248,7 @@ size_t encodeLinear(
 
 	if (dataSize == 0) return 8;
 
+	// TODO also check for overflow on the first two data points
 	ints[1] = static_cast<long long>(data[0] * fixedPoint + 0.5);
 	for (i=0; i<4; i++) {
 		result[8+i] = (ints[1] >> (i*8)) & 0xff;
@@ -266,9 +267,18 @@ size_t encodeLinear(
 	for (i=2; i<dataSize; i++) {
 		ints[0] = ints[1];
 		ints[1] = ints[2];
+		if (THROW_ON_OVERFLOW && data[i] * fixedPoint + 0.5 > LLONG_MAX)
+		{
+			throw "[MSNumpress::encodeLinear] Next number overflows LLONG_MAX.";
+		}
+
 		ints[2] = static_cast<long long>(data[i] * fixedPoint + 0.5);
 		extrapol = ints[1] + (ints[1] - ints[0]);
-		diff = ints[2] - extrapol;
+		if (THROW_ON_OVERFLOW && (ints[2] - extrapol > INT_MAX || ints[2] - extrapol < INT_MIN))
+		{
+			throw "[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX].";
+		}
+		diff = static_cast<int>(ints[2] - extrapol);
 		//printf("%lu %lu %lu,   extrapol: %ld    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
 		encodeInt(diff, &halfBytes[halfByteCount], &halfByteCount);
 		/*
@@ -534,6 +544,10 @@ size_t encodePic(
 	ri = 0;
 
 	for (i=0; i<dataSize; i++) {
+		if (THROW_ON_OVERFLOW && (data[i] + 0.5 > INT_MAX || data[i] < -0.5) )
+		{
+			throw "[MSNumpress::encodePic] Cannot use Pic to encode a number larger than INT_MAX or smaller than 0.";
+		}
 		count = static_cast<int>(data[i] + 0.5);
 		//printf("%d %d %d,   extrapol: %d    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
 		encodeInt(count, &halfBytes[halfByteCount], &halfByteCount);
@@ -676,8 +690,12 @@ size_t encodeSlof(
 
 	ri = 8;
 	for (i=0; i<dataSize; i++) {
+		if (THROW_ON_OVERFLOW && (log(data[i]+1) * fixedPoint + 0.5) > USHRT_MAX)
+		{
+			throw "[MSNumpress::encodeSlof] Cannot encode a number that overflows USHRT_MAX.";
+		}
 		x = static_cast<unsigned short>(log(data[i]+1) * fixedPoint + 0.5);
-		result[ri++] = x & 0xff;
+		result[ri++] = x & 0xff; // TODO what happens here if short is larger than 16 bit?
 		result[ri++] = x >> 8;
 	}
 	return ri;
@@ -691,7 +709,7 @@ size_t decodeSlof(
 		double *result
 ) {
 	size_t i, ri;
-	unsigned short x;
+	unsigned short x; // at least 16 bits
 	ri = 0;
 	double fixedPoint;
 

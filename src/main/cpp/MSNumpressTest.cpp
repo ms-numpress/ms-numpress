@@ -40,7 +40,6 @@ using std::max;
 double ENC_TWO_BYTE_FIXED_POINT = 3000.0;
 
 
-
 void encodeLinear1() {
 
 	double mzs[1];
@@ -131,6 +130,69 @@ void decodeLinearWierd() {
 	assert(abs(0.00010 - decoded[3]) < 0.000005);
 	
 	cout << "+ pass    decodeLinearWierd " << endl << endl;
+}
+
+void decodeLinearWierd_llong_overflow() {
+	double mzs[4];
+	
+	mzs[0] = 100.0;
+	mzs[1] = 200.0;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.000010;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+    ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000000);
+		cout << "- fail    test decodeLinearWierd_llong_overflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+    assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Next number overflows LLONG_MAX."));
+	}
+	cout << "+ pass    decodeLinearWierd_llong_overflow " << endl << endl;
+}
+
+void decodeLinearWierd_int_overflow() {
+	double mzs[4];
+	
+	mzs[0] = 100.0;
+	mzs[1] = 200.0;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.00006;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+    ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000);
+		cout << "- fail    test decodeLinearWierd_int_overflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+    assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX]."));
+	}
+	cout << "+ pass    decodeLinearWierd3 " << endl << endl;
+}
+
+void decodeLinearWierd_int_underflow() {
+	double mzs[4];
+	
+	mzs[0] = 30000000.00005;
+	mzs[1] = 60000000.00005;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.00006;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+    ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000);
+		cout << "- fail    test decodeLinearWierd_int_underflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+    assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX]."));
+	}
+	cout << "+ pass    decodeLinearWierd3 " << endl << endl;
 }
 
 
@@ -595,24 +657,27 @@ void testErroneousDecodePic() {
 
 
 int main(int argc, const char* argv[]) {
-	optimalLinearFixedPoint();
-	encodeLinear1();
-	encodeLinear();
-	decodeLinearNice();
+  optimalLinearFixedPoint();
+  encodeLinear1();
+  encodeLinear();
+  decodeLinearNice();
 	decodeLinearWierd();
-	decodeLinearCorrupt1();
-	decodeLinearCorrupt2();
-	encodeDecodeLinearStraight();
-	encodeDecodeLinear();
-	encodeDecodePic();
-	encodeDecodeSafeStraight();
-	encodeDecodeSafe();
-	optimalSlofFixedPoint();
-	encodeDecodeSlof();
-	encodeDecodeLinear5();
-	encodeDecodePic5();
-	encodeDecodeSlof5();
-	testErroneousDecodePic();
+	decodeLinearWierd_llong_overflow();
+	decodeLinearWierd_int_overflow();
+	decodeLinearWierd_int_underflow();
+  decodeLinearCorrupt1();
+  decodeLinearCorrupt2();
+  encodeDecodeLinearStraight();
+  encodeDecodeLinear();
+  encodeDecodePic();
+  encodeDecodeSafeStraight();
+  encodeDecodeSafe();
+  optimalSlofFixedPoint();
+  encodeDecodeSlof();
+  encodeDecodeLinear5();
+  encodeDecodePic5();
+  encodeDecodeSlof5();
+  testErroneousDecodePic();
 	
 	cout << "=== all tests succeeded! ===" << endl;
 	return 0;
