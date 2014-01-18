@@ -234,7 +234,7 @@ size_t encodeLinear(
 		unsigned char *result,
 		double fixedPoint
 ) {
-	unsigned long long ints[3];
+	long long ints[3];
 	size_t i, ri;
 	unsigned char halfBytes[10];
 	size_t halfByteCount;
@@ -248,14 +248,14 @@ size_t encodeLinear(
 
 	if (dataSize == 0) return 8;
 
-	ints[1] = data[0] * fixedPoint + 0.5;
+	ints[1] = static_cast<long long>(data[0] * fixedPoint + 0.5);
 	for (i=0; i<4; i++) {
 		result[8+i] = (ints[1] >> (i*8)) & 0xff;
 	}
 
 	if (dataSize == 1) return 12;
 
-	ints[2] = data[1] * fixedPoint + 0.5;
+	ints[2] = static_cast<long long>(data[1] * fixedPoint + 0.5);
 	for (i=0; i<4; i++) {
 		result[12+i] = (ints[2] >> (i*8)) & 0xff;
 	}
@@ -266,7 +266,7 @@ size_t encodeLinear(
 	for (i=2; i<dataSize; i++) {
 		ints[0] = ints[1];
 		ints[1] = ints[2];
-		ints[2] = data[i] * fixedPoint + 0.5;
+		ints[2] = static_cast<long long>(data[i] * fixedPoint + 0.5);
 		extrapol = ints[1] + (ints[1] - ints[0]);
 		diff = ints[2] - extrapol;
 		//printf("%lu %lu %lu,   extrapol: %ld    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
