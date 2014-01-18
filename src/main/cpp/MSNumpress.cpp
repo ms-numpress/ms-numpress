@@ -78,13 +78,16 @@ static double decodeFixedPoint(
  * which will be 1 <= n <= 9
  */
 static void encodeInt(
-		const int x,
+		const int x_inp,
 		unsigned char* res,
 		size_t *res_length	
 ) {
-    int i, l, m;
+    // get the bit pattern of a signed int x_inp
+    unsigned int x = static_cast<unsigned int>(x_inp);
+    unsigned int m;
+    unsigned char i, l; // numbers between 0 and 9
     unsigned int mask = 0xf0000000;
-    int init = x & mask;
+    unsigned int init = x & mask;
 
 	if (init == 0) {
 		l = 8;
@@ -97,7 +100,7 @@ static void encodeInt(
 		}
 		res[0] = l;
 		for (i=l; i<8; i++) {
-			res[1+i-l] = x >> (4*(i-l));
+			res[1+i-l] = static_cast<unsigned char>(x >> (4*(i-l)));
 		}
 		*res_length += 1+8-l;
 
@@ -112,14 +115,14 @@ static void encodeInt(
 		}
 		res[0] = l + 8;
 		for (i=l; i<8; i++) {
-			res[1+i-l] = x >> (4*(i-l));
+			res[1+i-l] = static_cast<unsigned char>(x >> (4*(i-l)));
 		}
 		*res_length += 1+8-l;
 
 	} else {
 		res[0] = 0;
 		for (i=0; i<8; i++) {
-			res[1+i] = x >> (4*i);
+			res[1+i] = static_cast<unsigned char>(x >> (4*i));
 		}
 		*res_length += 9;
 
