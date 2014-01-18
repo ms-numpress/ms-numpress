@@ -569,7 +569,7 @@ size_t decodePic(
 		const size_t dataSize,
 		double *result
 ) {
-	size_t i, ri;
+	size_t ri;
 	int count;
 	//double d;
 	size_t di;
@@ -604,7 +604,7 @@ size_t decodePic(
 		cerr << "dataSize: " << dataSize << endl;
 		cerr << "count: " << count << endl;
 
-		for (i = di - 3; i < min(di + 3, dataSize); i++) {
+		for (size_t i = di - 3; i < min(di + 3, dataSize); i++) {
 			cerr << "data[" << i << "] = " << data[i];
 		}
 		cerr << endl;
