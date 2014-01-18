@@ -34,7 +34,7 @@ using std::abs;
 
 
 const int ONE = 1;
-bool is_big_endian() {
+static bool is_big_endian() {
 	return *((char*)&(ONE)) == 1;
 }
 bool IS_BIG_ENDIAN = is_big_endian();
@@ -43,7 +43,7 @@ bool IS_BIG_ENDIAN = is_big_endian();
 
 /////////////////////////////////////////////////////////////
 
-void encodeFixedPoint(
+static void encodeFixedPoint(
 		double fixedPoint, 
 		unsigned char *result
 ) {
@@ -56,7 +56,7 @@ void encodeFixedPoint(
 
 
 
-double decodeFixedPoint(
+static double decodeFixedPoint(
 		const unsigned char *data
 ) {
 	int i;
@@ -77,7 +77,7 @@ double decodeFixedPoint(
  * res_length is incremented by the number of halfbytes, 
  * which will be 1 <= n <= 9
  */
-void encodeInt(
+static void encodeInt(
 		const int x,
 		unsigned char* res,
 		size_t *res_length	
@@ -131,7 +131,7 @@ void encodeInt(
 /**
  * Decodes an int from the half bytes in bp. Lossless reverse of encodeInt 
  */
-void decodeInt(
+static void decodeInt(
 		const unsigned char *data,
 		size_t *di,
 		size_t max_di,
