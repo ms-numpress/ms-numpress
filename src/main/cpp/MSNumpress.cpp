@@ -508,7 +508,7 @@ int decodeSafe(
 		return -1;
 	}
 	
-	return ri;
+	return static_cast<int>(ri);
 }
 
 /////////////////////////////////////////////////////////////
