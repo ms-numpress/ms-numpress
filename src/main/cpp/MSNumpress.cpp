@@ -161,7 +161,7 @@ static void decodeInt(
 		mask = 0xf0000000;
 		for (i=0; i<n; i++) {
 			m = mask >> (4*i);
-			*res = *res | m;
+			*res = *res | static_cast<int>(m);
 		}
 	}
 	
