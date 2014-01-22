@@ -44,6 +44,12 @@
 #include <cstddef>
 #include <vector>
 
+// defines whether to throw an exception when a number cannot be encoded safely
+// with the given parameters
+#ifndef THROW_ON_OVERFLOW
+#define THROW_ON_OVERFLOW true
+#endif
+
 namespace ms {
 namespace numpress {
 
@@ -149,12 +155,14 @@ namespace MSNumpress {
 	 *
 	 * result vector is the same size as the input data.
 	 *
+	 * Might throw const char* is something goes wrong during decoding.
+	 *
 	 * @data		pointer to array of bytes to be decoded (need memorycont. repr.)
 	 * @dataSize	number of bytes from *data to decode
 	 * @result		pointer to were resulting doubles should be stored
-	 * @return		the number of decoded bytes or -1 if something went wrong.
+	 * @return		the number of decoded bytes
 	 */
-	int decodeSafe(
+	size_t decodeSafe(
 		const unsigned char *data,
 		const size_t dataSize,
 		double *result);

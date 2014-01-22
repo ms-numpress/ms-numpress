@@ -133,14 +133,75 @@ void decodeLinearWierd() {
 	cout << "+ pass    decodeLinearWierd " << endl << endl;
 }
 
+void decodeLinearWierd_llong_overflow() {
+	double mzs[4];
+	
+	mzs[0] = 100.0;
+	mzs[1] = 200.0;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.000010;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+		ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000000);
+		cout << "- fail    test decodeLinearWierd_llong_overflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Next number overflows LLONG_MAX."));
+	}
+	cout << "+ pass    decodeLinearWierd_llong_overflow " << endl << endl;
+}
+
+void decodeLinearWierd_int_overflow() {
+	double mzs[4];
+	
+	mzs[0] = 100.0;
+	mzs[1] = 200.0;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.00006;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+		ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000);
+		cout << "- fail    test decodeLinearWierd_int_overflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX]."));
+	}
+	cout << "+ pass    decodeLinearWierd3 " << endl << endl;
+}
+
+void decodeLinearWierd_int_underflow() {
+	double mzs[4];
+	
+	mzs[0] = 30000000.00005;
+	mzs[1] = 60000000.00005;
+	mzs[2] = 30000000.00005;
+	mzs[3] = 0.00006;
+	
+	size_t nMzs = 4;
+	unsigned char encoded[28];
+
+	try {
+		ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], 1000000000);
+		cout << "- fail    test decodeLinearWierd_int_underflow: didn't throw exception for corrupt input " << endl << endl;
+		assert(0 == 1);
+	} catch (const char *err) {
+		assert( std::string(err) == std::string("[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX]."));
+	}
+	cout << "+ pass    decodeLinearWierd3 " << endl << endl;
+}
 
 void decodeLinearCorrupt1() {
 	unsigned char encoded[20];
 	double decoded[4];
 	
-	size_t numDecoded;
 	try {
-		numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 11, &decoded[0]);
+		ms::numpress::MSNumpress::decodeLinear(&encoded[0], 11, &decoded[0]);
 		cout << "- fail    decodeLinearCorrupt1: didn't throw exception for corrupt input " << endl << endl;
 		assert(0 == 1);
 	} catch (const char *err) {
@@ -148,7 +209,7 @@ void decodeLinearCorrupt1() {
 	}
 	
 	try {
-		numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], 14, &decoded[0]);
+		ms::numpress::MSNumpress::decodeLinear(&encoded[0], 14, &decoded[0]);
 		cout << "- fail    decodeLinearCorrupt1: didn't throw exception for corrupt input " << endl << endl;
 		assert(0 == 1);
 	} catch (const char *err) {
@@ -175,7 +236,7 @@ void decodeLinearCorrupt2() {
 	
 	double decoded[4];
 	try {
-		size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes-1, &decoded[0]);
+		ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes-1, &decoded[0]);
 		cout << "- fail    decodeLinearCorrupt2: didn't throw exception for corrupt input " << endl << endl;
 		assert(0 == 1);
 	} catch (const char *err) {
@@ -193,7 +254,7 @@ void optimalLinearFixedPoint() {
 	size_t n = 1000;
 	double mzs[1000];
 	mzs[0] = 300 + (rand() % 1000) / 1000.0;
-	for (int i=1; i<n; i++) 
+	for (size_t i=1; i<n; i++) 
 		mzs[i] = mzs[i-1] + (rand() % 1000) / 1000.0;
 	
 	cout << "+                    max val: " << mzs[n-1] << endl;
@@ -205,7 +266,7 @@ void optimalLinearFixedPoint() {
 void encodeDecodeLinearStraight() {
 	size_t n = 15;
 	double mzs[15];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		mzs[i] = i;
 	
 	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], n);
@@ -222,7 +283,7 @@ void encodeDecodeLinearStraight() {
 	double error;
 	double mLim = 0.000005;
 	
-	for (int i=0; i<n; i++) { 
+	for (size_t i=0; i<n; i++) { 
 		error = abs(mzs[i] - decoded[i]);
 		m = max(m, error);
 		if (error >= mLim) {
@@ -230,7 +291,7 @@ void encodeDecodeLinearStraight() {
 			assert(error < mLim);
 		}
 	}
-	cout << "+         compression: " << encodedBytes / double(n*8) * 100 << "% " << endl;
+	cout << "+     size compressed: " << encodedBytes / double(n*8) * 100 << "% " << endl;
 	cout << "+           max error: " << m << "  limit: " << mLim << endl;
 	cout << "+ pass    encodeDecodeLinearStraight " << endl << endl;
 }
@@ -242,7 +303,7 @@ void encodeDecodeSafeStraight() {
 	double eLim = 1.0e-300;
 	size_t n = 15;
 	double mzs[15];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		mzs[i] = i+1;
 	
 	unsigned char encoded[8000];
@@ -263,7 +324,7 @@ void encodeDecodeSafeStraight() {
 	size_t numDecoded = ms::numpress::MSNumpress::decodeSafe(&encoded[0], encodedBytes, &decoded[0]);
 	
 	assert(numDecoded == n);
-	for (int i=0; i<n; i++) { 
+	for (size_t i=0; i<n; i++) { 
 		error = abs(mzs[i] - decoded[i]);
 		if (error >= eLim) {
 			cout << "error   " << error << " is non-zero ( >= " << eLim << " )" << endl;
@@ -283,7 +344,7 @@ void encodeDecodeSafe() {
 	size_t n = 1000;
 	double mzs[1000];
 	mzs[0] = 300 + rand() / double(RAND_MAX);
-	for (int i=1; i<n; i++) 
+	for (size_t i=1; i<n; i++) 
 		mzs[i] = mzs[i-1] + rand() / double(RAND_MAX);
 	
 	unsigned char encoded[8000];
@@ -295,7 +356,7 @@ void encodeDecodeSafe() {
 	size_t numDecoded = ms::numpress::MSNumpress::decodeSafe(&encoded[0], encodedBytes, &decoded[0]);
 	
 	assert(numDecoded == n);
-	for (int i=0; i<n; i++) { 
+	for (size_t i=0; i<n; i++) { 
 		error = abs(mzs[i] - decoded[i]);
 		if (error >= eLim) {
 			cout << "error   " << error << " is non-zero ( >= " << eLim << " )" << endl;
@@ -313,7 +374,7 @@ void encodeDecodeLinear() {
 	size_t n = 1000;
 	double mzs[1000];
 	mzs[0] = 300 + rand() / double(RAND_MAX);
-	for (int i=1; i<n; i++) 
+	for (size_t i=1; i<n; i++) 
 		mzs[i] = mzs[i-1] + rand() / double(RAND_MAX);
 	
 	double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPoint(&mzs[0], n);
@@ -330,7 +391,7 @@ void encodeDecodeLinear() {
 	double error;
 	double mLim = 0.000005;
 	
-	for (int i=0; i<n; i++) { 
+	for (size_t i=0; i<n; i++) { 
 		error = abs(mzs[i] - decoded[i]);
 		m = max(m, error);
 		if (error >= mLim) {
@@ -338,7 +399,7 @@ void encodeDecodeLinear() {
 			assert(error < mLim);
 		}
 	}
-	cout << "+         compression: " << encodedBytes / double(n*8) * 100 << "% " << endl;
+	cout << "+     size compressed: " << encodedBytes / double(n*8) * 100 << "% " << endl;
 	cout << "+           max error: " << m << "  limit: " << mLim << endl;
 	cout << "+ pass    encodeDecodeLinear " << endl << endl;
 }
@@ -351,7 +412,7 @@ void encodeDecodeLinear5() {
 	size_t n = 1000;
 	double mzs[1000];
 	mzs[0] = 100 + (rand() % 1000) / 1000.0;
-	for (int i=1; i<n; i++) 
+	for (size_t i=1; i<n; i++) 
 		mzs[i] = mzs[i-1] + (rand() % 1000) / 1000.0;
 		
 	size_t encodedBytes;
@@ -365,10 +426,10 @@ void encodeDecodeLinear5() {
 	encodedBytes 	= ms::numpress::MSNumpress::encodeLinear(&mzs[0], n, &encoded[0], fixedPoint);
 	numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		firstDecoded[i] = decoded[i];
 	
-	for (int i=0; i<5; i++) {
+	for (size_t i=0; i<5; i++) {
 		encodedBytes 	= ms::numpress::MSNumpress::encodeLinear(&decoded[0], n, &encoded[0], fixedPoint);
 		numDecoded 		= ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
 	}
@@ -378,7 +439,7 @@ void encodeDecodeLinear5() {
 	assert(fixedPoint == afterFixedPoint);
 	assert(n == numDecoded);
 		
-	for (int i=0; i<n; i++)
+	for (size_t i=0; i<n; i++)
 		if (firstDecoded[i] != decoded[i]) {
 			cout << endl << firstDecoded[i] << " " << decoded[i] << endl;
 			assert(firstDecoded[i] == decoded[i]);
@@ -394,7 +455,7 @@ void encodeDecodePic() {
 	
 	size_t n = 1000;
 	double ics[1000];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		ics[i] = rand() % 1000000;
 	
 	unsigned char encoded[5000];
@@ -405,7 +466,7 @@ void encodeDecodePic() {
 	
 	assert(n == numDecoded);
 	
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		assert(abs(ics[i] - decoded[i]) < 0.5);
 	
 	cout << "+ pass    encodeDecodePic " << endl << endl;
@@ -418,7 +479,7 @@ void encodeDecodePic5() {
 	
 	size_t n = 1000;
 	double ics[1000];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		ics[i] = rand() % 1000000;
 	
 	ics[1] = 0.0;
@@ -434,17 +495,17 @@ void encodeDecodePic5() {
 	encodedBytes 	= ms::numpress::MSNumpress::encodePic(&ics[0], n, &encoded[0]);
 	numDecoded 		= ms::numpress::MSNumpress::decodePic(&encoded[0], encodedBytes, &decoded[0]);
 	
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		firstDecoded[i] = decoded[i];
 	
-	for (int i=0; i<5; i++) {
+	for (size_t i=0; i<5; i++) {
 		encodedBytes 	= ms::numpress::MSNumpress::encodePic(&decoded[0], n, &encoded[0]);
 		numDecoded 		= ms::numpress::MSNumpress::decodePic(&encoded[0], encodedBytes, &decoded[0]);
 	}
 	
 	assert(n == numDecoded);
 		
-	for (int i=0; i<n; i++)
+	for (size_t i=0; i<n; i++)
 		if (firstDecoded[i] != decoded[i]) {
 			cout << endl << firstDecoded[i] << " " << decoded[i] << endl;
 			assert(firstDecoded[i] == decoded[i]);
@@ -461,7 +522,7 @@ void optimalSlofFixedPoint() {
 	
 	size_t n = 1000;
 	double ics[1000];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		ics[i] = rand() % 1000000;
 		
 	cout << "+           optimal slof fp: " << ms::numpress::MSNumpress::optimalSlofFixedPoint(&ics[0], n) << endl;
@@ -475,7 +536,7 @@ void encodeDecodeSlof() {
 	
 	size_t n = 1000;
 	double ics[1000];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		ics[i] = rand() % 1000000;
 	
 	ics[1] = 0.0;
@@ -498,7 +559,7 @@ void encodeDecodeSlof() {
 	double rmLim = 0.0005;
 	double error;
 	
-	for (int i=0; i<n; i++)
+	for (size_t i=0; i<n; i++)
 		if (ics[i] < 1.0) {
 			error = abs(ics[i] - decoded[i]);
 			m = max(m, error);
@@ -526,7 +587,7 @@ void encodeDecodeSlof5() {
 	
 	size_t n = 1000;
 	double ics[1000];
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		ics[i] = rand() % 1000000;
 	
 	ics[1] = 0.0;
@@ -544,10 +605,10 @@ void encodeDecodeSlof5() {
 	encodedBytes 	= ms::numpress::MSNumpress::encodeSlof(&ics[0], n, &encoded[0], fixedPoint);
 	numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0]);
 	
-	for (int i=0; i<n; i++) 
+	for (size_t i=0; i<n; i++) 
 		firstDecoded[i] = decoded[i];
 	
-	for (int i=0; i<5; i++) {
+	for (size_t i=0; i<5; i++) {
 		encodedBytes 	= ms::numpress::MSNumpress::encodeSlof(&decoded[0], n, &encoded[0], fixedPoint);
 		numDecoded 		= ms::numpress::MSNumpress::decodeSlof(&encoded[0], encodedBytes, &decoded[0]);
 	}
@@ -557,7 +618,7 @@ void encodeDecodeSlof5() {
 	assert(n == numDecoded);
 	assert(fixedPoint == afterFixedPoint);
 	
-	for (int i=0; i<n; i++)
+	for (size_t i=0; i<n; i++)
 		if (firstDecoded[i] != decoded[i]) {
 			cout << endl << firstDecoded[i] << " " << decoded[i] << endl;
 			assert(firstDecoded[i] == decoded[i]);
