@@ -143,8 +143,7 @@ static void decodeInt(
 		size_t *half,
 		unsigned int *res
 ) {
-    size_t n;
-    size_t i;
+    size_t n, i;
     unsigned int mask, m;
     unsigned char head;
     unsigned char hb;
@@ -185,7 +184,7 @@ static void decodeInt(
 			hb = data[*di] & 0xf;
 			(*di)++;
 		}
-		*res = *res | ( hb << ((i-n)*4));
+		*res = *res | ( static_cast<unsigned int>(hb) << ((i-n)*4));
 		*half = 1 - (*half);
 	}
 }
@@ -284,7 +283,7 @@ size_t encodeLinear(
 			throw "[MSNumpress::encodeLinear] Cannot encode a number that exceeds the bounds of [-INT_MAX, INT_MAX].";
 		}
 
-		diff = ints[2] - extrapol;
+		diff = static_cast<int>(ints[2] - extrapol);
 		//printf("%lu %lu %lu,   extrapol: %ld    diff: %d \n", ints[0], ints[1], ints[2], extrapol, diff);
 		encodeInt(
 				static_cast<unsigned int>(diff), 
