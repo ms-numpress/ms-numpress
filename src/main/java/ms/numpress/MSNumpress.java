@@ -296,9 +296,10 @@ public class MSNumpress {
 		long extrapol;
 		long y;
 		IntDecoder dec = new IntDecoder(data, 16);
-		
+
+		if (dataSize == 8) return 0;
 		if (dataSize < 8) return -1;
-		double fixedPoint = decodeFixedPoint(data);	
+		double fixedPoint = decodeFixedPoint(data);
 		if (dataSize < 12) return -1;
 		
 		ints[1] = 0;

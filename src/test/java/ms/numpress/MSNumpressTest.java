@@ -128,6 +128,16 @@ public class MSNumpressTest {
 	
 	
 	@Test
+	public void encodeDecodeLinearEmpty() {
+		byte[] encoded 		= new byte[8];
+		int encodedBytes 	= MSNumpress.encodeLinear(new double[0], 0, encoded, 100000.0);
+		double[] decoded	= new double[0];
+		int decodedBytes 	= MSNumpress.decodeLinear(encoded, 8, decoded);
+		assertEquals(0, decodedBytes);
+	}
+	
+	
+	@Test
 	public void decodeLinearNice() {
 		double[] mzs = {100.0, 200.0, 300.00005, 400.00010};
 		byte[] encoded 		= new byte[28];
@@ -148,7 +158,6 @@ public class MSNumpressTest {
 		byte[] encoded 		= new byte[28];
 		double fixedPoint	= MSNumpress.optimalLinearFixedPoint(mzs, 4);
 		int encodedBytes 	= MSNumpress.encodeLinear(mzs, 4, encoded, fixedPoint);
-		System.out.println("hehas: "+encodedBytes);
 		double[] decoded 	= new double[4];
 		int numDecoded 		= MSNumpress.decodeLinear(encoded, encodedBytes, decoded);
 		assertEquals(4, numDecoded);
