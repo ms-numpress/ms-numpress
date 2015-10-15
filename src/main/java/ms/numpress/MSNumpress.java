@@ -45,23 +45,34 @@ public class MSNumpress {
 			String cvAccession, 
 			byte[] data, 
 			int dataSize
-	) {
-		
+	) {		
 		if (cvAccession.equals(ACC_NUMPRESS_LINEAR)) {
+			if (dataSize < 8 || data.length < 8)
+				throw new IllegalArgumentException("Cannot decode numLin data, need at least 8 initial bytes for fixed point.")
+
 			double[] buffer 	= new double[dataSize * 2];
 			int nbrOfDoubles 	= MSNumpress.decodeLinear(data, dataSize, buffer);
+			if (nbrOfDoubles < 0)
+				throw new IllegalArgumentException("Corrupt numLin data!")
+
 			double[] result 	= new double[nbrOfDoubles];
 			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
 			return result;
 			
 		} else if (cvAccession.equals(ACC_NUMPRESS_SLOF)) {
-			double[] result 	= new double[dataSize / 2];
+			double[] result 	= new double[(dataSize-8) / 2];
 			MSNumpress.decodeSlof(data, dataSize, result);
 			return result;
 			
 		} else if (cvAccession.equals(ACC_NUMPRESS_PIC)) {
+			if (dataSize < 8 || data.length < 8)
+				throw new IllegalArgumentException("Cannot decode numPic data, need at least 8 initial bytes for fixed point.")
+
 			double[] buffer 	= new double[dataSize * 2];
 			int nbrOfDoubles 	= MSNumpress.decodePic(data, dataSize, buffer);
+			if (nbrOfDoubles < 0)
+				throw new IllegalArgumentException("Corrupt numPic data!")
+
 			double[] result 	= new double[nbrOfDoubles];
 			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
 			return result;
@@ -194,7 +205,7 @@ public class MSNumpress {
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point repressentation
-	 *   - storing the residuals from a linear prediction after first to values
+	 *   - storing the residuals from a linear prediction after first two values
 	 *   - encoding by encodeInt (see above) 
 	 * 
 	 * The resulting binary is maximally 8 + dataSize * 5 bytes, but much less if the 
