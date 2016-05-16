@@ -47,13 +47,13 @@ public class MSNumpress {
 			int dataSize
 	) {		
 		if (cvAccession.equals(ACC_NUMPRESS_LINEAR)) {
-			if (dataSize < 8 || data.length < 8)
-				throw new IllegalArgumentException("Cannot decode numLin data, need at least 8 initial bytes for fixed point.")
+			if (dataSize < 8 || data.length < 8)
+				throw new IllegalArgumentException("Cannot decode numLin data, need at least 8 initial bytes for fixed point.");
 
 			double[] buffer 	= new double[dataSize * 2];
 			int nbrOfDoubles 	= MSNumpress.decodeLinear(data, dataSize, buffer);
 			if (nbrOfDoubles < 0)
-				throw new IllegalArgumentException("Corrupt numLin data!")
+				throw new IllegalArgumentException("Corrupt numLin data!");
 
 			double[] result 	= new double[nbrOfDoubles];
 			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
@@ -65,13 +65,13 @@ public class MSNumpress {
 			return result;
 			
 		} else if (cvAccession.equals(ACC_NUMPRESS_PIC)) {
-			if (dataSize < 8 || data.length < 8)
-				throw new IllegalArgumentException("Cannot decode numPic data, need at least 8 initial bytes for fixed point.")
+			if (dataSize < 8 || data.length < 8)
+				throw new IllegalArgumentException("Cannot decode numPic data, need at least 8 initial bytes for fixed point.");
 
 			double[] buffer 	= new double[dataSize * 2];
 			int nbrOfDoubles 	= MSNumpress.decodePic(data, dataSize, buffer);
 			if (nbrOfDoubles < 0)
-				throw new IllegalArgumentException("Corrupt numPic data!")
+				throw new IllegalArgumentException("Corrupt numPic data!");
 
 			double[] result 	= new double[nbrOfDoubles];
 			System.arraycopy(buffer, 0, result, 0, nbrOfDoubles);
