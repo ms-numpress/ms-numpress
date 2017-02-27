@@ -36,7 +36,7 @@ move to `src/main/python` and compile and run tests (on LINUX) with
 Ensure that a version of Visual Studio is installed on your system. Then open a Visual Studio Cross Tools Command Prompt, 
 move to `src\main\csharp` and compile\run tests (on WINDOWS) with
 
-	csc /target:library MSNumpress.cs MSNumpressTest.cs /reference:"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+	csc /target:library MSNumpress.cs MSNumpressTest.cs /reference:"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll"
 	MSTest /testcontainer:MSNumpress.dll
 
 NOTE: The example above is for Visual Studio Community 2015 (v14.0). If you use a different version, your path to the unit test reference DLL will be slightly different.
