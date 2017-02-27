@@ -8,7 +8,7 @@ The library provides implementations of 3 different algorithms,
 time or M/Z arrays, and 2 for compressing non smooth data with
 lower requirements on precision like ion count arrays.
 
-Implementations and unit test are provided in C++ and Java, for Python
+Implementations and unit test are provided in C++, Java, and C#: for Python
 bindings exist.
 
 ### C++ library tests
@@ -30,6 +30,13 @@ move to `src/main/python` and compile and run tests (on LINUX) with
 
 	python setup.py build_ext --inplace 
 	nosetests test_pymsnumpress.py  
+
+### C# library tests
+
+Launch a Visual Studio Cross Tools Command Prompt. Example below for Visual Studio Community 2015 (v14.0). If you use a different version, your path to the unit test reference DLL will be slightly different.
+
+	csc /target:library MSNumpress.cs MSNumpressTest.cs /reference:"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+	MSTest /testcontainer:MSNumpress.dll
 
 Numpress Pic
 ------------
