@@ -22,6 +22,11 @@ from libcpp.vector cimport vector as libcpp_vector
 
 cdef extern from "MSNumpress.hpp" namespace "ms::numpress::MSNumpress":
 
+    double optimalLinearFixedPointMass(
+        double *data, 
+        size_t dataSize,
+        double mass_acc)
+
     double optimalLinearFixedPoint(
         double *data, 
         size_t dataSize)

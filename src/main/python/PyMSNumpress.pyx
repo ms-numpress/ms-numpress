@@ -23,12 +23,21 @@ from cython.operator cimport dereference as deref, preincrement as inc, address 
 from MSNumpress cimport encodeLinear as _encodeLinear
 from MSNumpress cimport decodeLinear as _decodeLinear
 from MSNumpress cimport optimalLinearFixedPoint as _optimalLinearFixedPoint
+from MSNumpress cimport optimalLinearFixedPointMass as _optimalLinearFixedPointMass
 from MSNumpress cimport encodeSlof as _encodeSlof
 from MSNumpress cimport decodeSlof as _decodeSlof
 from MSNumpress cimport optimalSlofFixedPoint as _optimalSlofFixedPoint
 from MSNumpress cimport encodePic as _encodePic
 from MSNumpress cimport decodePic as _decodePic
 
+
+def optimalLinearFixedPointMass(data, mz):
+    dataSize = len(data)
+    cdef libcpp_vector[double] c_data = data
+
+    cdef double result = _optimalLinearFixedPointMass( &c_data[0], dataSize, mz)
+
+    return result
 
 def optimalLinearFixedPoint(data):
     dataSize = len(data)

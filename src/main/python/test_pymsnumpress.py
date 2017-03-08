@@ -76,6 +76,10 @@ class TestMSNumpress(unittest.TestCase):
         pt = PyMSNumpress.optimalLinearFixedPoint(self.data)
         self.assertAlmostEqual(pt, 21262214.0)
 
+    def test_optimalLinearFixedPointMass(self):
+        pt = PyMSNumpress.optimalLinearFixedPointMass(self.data, 0.001)
+        self.assertAlmostEqual(pt, 500.0)
+
     def test_encodeSlof(self):
 
         result = []
