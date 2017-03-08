@@ -55,10 +55,37 @@ namespace numpress {
 
 namespace MSNumpress {
 	
+	/**
+	 * Compute the maximal linear fixed point that prevents integer overflow.
+     *
+	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
+	 * @dataSize	number of doubles from *data to encode
+     *
+	 * @return		the linear fixed point safe to use
+	 */
 	double optimalLinearFixedPoint(
 		const double *data, 
 		size_t dataSize);
 	
+	/**
+	 * Compute the optimal linear fixed point with a desired m/z accuracy.
+     *
+     * @note If the desired accuracy cannot be reached without overflowing 64
+     * bit integers, then a negative value is returned. You need to check for
+     * this and in that case abandon numpress or use optimalLinearFixedPoint
+     * which returns the largest safe value.
+     *
+	 * @data		pointer to array of double to be encoded (need memorycont. repr.)
+	 * @dataSize	number of doubles from *data to encode
+	 * @mass_acc	desired m/z accuracy in Th
+     *
+	 * @return		the linear fixed point that satisfies the accuracy requirement (or -1 in case of failure).
+	 */
+    double optimalLinearFixedPointMass(
+            const double *data, 
+            size_t dataSize,
+            double mass_acc);
+
 	/**
 	 * Encodes the doubles in data by first using a 
 	 *   - lossy conversion to a 4 byte 5 decimal fixed point representation

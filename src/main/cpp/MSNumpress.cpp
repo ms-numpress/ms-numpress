@@ -194,6 +194,26 @@ static void decodeInt(
 
 /////////////////////////////////////////////////////////////
 
+double optimalLinearFixedPointMass(
+		const double *data, 
+		size_t dataSize,
+        double mass_acc
+) {
+	if (dataSize < 3) return 0; // we just encode the first two points as floats
+
+    // We calculate the maximal fixedPoint we need to achieve a specific mass
+    // accuracy. Note that the maximal error we will make by encoding as int is
+    // 0.5 due to rounding errors.
+    double maxFP = 0.5 / mass_acc;
+
+    // There is a maximal value for the FP given by the int length (32bit)
+    // which means we cannot choose a value higher than that. In case we cannot
+    // achieve the desired accuracy, return failure (-1).
+    double maxFP_overflow = optimalLinearFixedPoint(data, dataSize);
+    if (maxFP > maxFP_overflow) return -1;
+
+    return maxFP;
+}
 
 double optimalLinearFixedPoint(
 		const double *data, 
