@@ -83,7 +83,6 @@ void encodeLinear() {
 	cout << "+ pass    encodeLinear " << endl << endl;
 }
 
-
 void decodeLinearNice() {
 	
 	double mzs[4];
@@ -107,6 +106,87 @@ void decodeLinearNice() {
 	assert(abs(400.00010 - decoded[3]) < 0.000005);
 	
 	cout << "+ pass    decodeLinearNice " << endl << endl;
+}
+
+void decodeLinearNiceLowFP() {
+  
+  double mzs[7];
+  
+  mzs[0] = 100.0;
+  mzs[1] = 200.0;
+  mzs[2] = 300.00005;
+  mzs[3] = 400.00010;
+  mzs[4] = 450.00010;
+  mzs[5] = 455.00010;
+  mzs[6] = 700.00010;
+  
+  size_t nMzs = 7;
+  unsigned char encoded[28];
+
+  // check for fixed points
+  {
+    double fixedPoint;
+    fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 0.1);
+    assert( abs(5 - fixedPoint) < 0.000005);
+
+    fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 1e-3);
+    assert( abs(500 - fixedPoint) < 0.000005);
+
+    fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 1e-5);
+    assert( abs(50000 - fixedPoint) < 0.000005);
+
+    fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 1e-7);
+    assert( abs(5000000 - fixedPoint) < 0.000005);
+
+    // cannot fulfill accuracy of 1e-8
+    fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 1e-8);
+    assert( abs(-1 - fixedPoint) < 0.000005);
+  }
+
+  {
+    double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, 0.001);
+    size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], fixedPoint);
+
+    double decoded[7];
+    size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
+    assert(25 == encodedBytes);
+    assert(7 == numDecoded);
+
+    assert(abs(100.0 - decoded[0]) < 0.001);
+    assert(abs(200.0 - decoded[1]) < 0.001);
+    assert(abs(300.00005 - decoded[2]) < 0.001);
+    assert(abs(400.00010 - decoded[3]) < 0.001);
+  }
+  
+  double mz_err[7];
+  double encodedLength[7];
+
+  // for higher accuracy, we get longer encoded lengths
+  mz_err[0] = 0.1;  encodedLength[0] = 22;
+  mz_err[1] = 1e-3; encodedLength[1] = 25;
+  mz_err[2] = 1e-5; encodedLength[2] = 29;
+  mz_err[3] = 1e-6; encodedLength[3] = 30;
+  mz_err[3] = 1e-7; encodedLength[3] = 31;
+
+  for (int k = 0; k < 4; k++)
+  {
+    double fixedPoint = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], nMzs, mz_err[k]);
+    size_t encodedBytes = ms::numpress::MSNumpress::encodeLinear(&mzs[0], nMzs, &encoded[0], fixedPoint);
+
+    double decoded[7];
+    size_t numDecoded = ms::numpress::MSNumpress::decodeLinear(&encoded[0], encodedBytes, &decoded[0]);
+    assert( encodedLength[k] == encodedBytes);
+    assert(7 == numDecoded);
+    assert(abs(100.0 - decoded[0]) < mz_err[k]);
+    assert(abs(200.0 - decoded[1]) < mz_err[k]);
+    assert(abs(300.00005 - decoded[2]) < mz_err[k]);
+    assert(abs(400.00010 - decoded[3]) < mz_err[k]);
+    assert(abs(450.00010 - decoded[4]) < mz_err[k]);
+    assert(abs(455.00010 - decoded[5]) < mz_err[k]);
+    assert(abs(700.00010 - decoded[6]) < mz_err[k]);
+  }
+
+  cout << "+ pass    decodeLinearNiceFP " << endl << endl;
 }
 
 void decodeLinearWierd() {
@@ -262,6 +342,30 @@ void optimalLinearFixedPoint() {
 	cout << "+ pass    optimalLinearFixedPoint " << endl << endl;
 }
 
+
+void optimalLinearFixedPointMass() {
+	srand(123459);
+	
+	size_t n = 1000;
+	double mzs[1000];
+	mzs[0] = 300 + (rand() % 1000) / 1000.0;
+	for (size_t i=1; i<n; i++) 
+		mzs[i] = mzs[i-1] + (rand() % 1000) / 1000.0;
+	
+	double fixedP; 
+
+	fixedP = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], n, 0.1); 
+	assert(abs(5.0 - fixedP) < 0.000005);
+
+	fixedP = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], n, 0.01); 
+	assert(abs(50.0 - fixedP) < 0.000005);
+
+	fixedP = ms::numpress::MSNumpress::optimalLinearFixedPointMass(&mzs[0], n, 0.001); 
+	assert(abs(500.0 - fixedP) < 0.000005);
+
+	cout << "+          optimal linear fp: " << fixedP << endl;
+	cout << "+ pass    optimalLinearFixedPointMass " << endl << endl;
+}
 
 void encodeDecodeLinearStraight() {
 	size_t n = 15;
@@ -657,9 +761,11 @@ void testErroneousDecodePic() {
 
 int main(int argc, const char* argv[]) {
 	optimalLinearFixedPoint();
+	optimalLinearFixedPointMass();
 	encodeLinear1();
 	encodeLinear();
 	decodeLinearNice();
+	decodeLinearNiceLowFP();
 	decodeLinearWierd();
 	decodeLinearCorrupt1();
 	decodeLinearCorrupt2();
