@@ -135,6 +135,17 @@ static void encodeInt(
 
 /**
  * Decodes an int from the half bytes in bp. Lossless reverse of encodeInt 
+ *
+ * @param data ptr to the char data to decode
+ * @param di position in the char data array to start decoding (will be advanced)
+ * @param max_di size of data array 
+ * @param half helper variable (do not change between multiple calls)
+ * @param res result (a 32 bit integer)
+ *
+ * @note the helper variable indicates whether we look at the first half byte
+ * or second half byte of the current data (thus whether to interpret the first
+ * half byte of data[*di] or the second half byte).
+ *
  */
 static void decodeInt(
 		const unsigned char *data,
@@ -148,6 +159,10 @@ static void decodeInt(
     unsigned char head;
     unsigned char hb;
 
+	// Extract the first half byte, specifying the number of leading zero half
+	// bytes of the final integer.
+	// If half is zero, we look at the first half byte, otherwise we look at
+	// the second (lower) half byte and advance the counter to the next char.
 	if (*half == 0) {
 		head = data[*di] >> 4;
 	} else {
@@ -155,12 +170,12 @@ static void decodeInt(
 		(*di)++;
 	}
 
-	*half = 1-(*half);
+	*half = 1-(*half); // switch to other half byte
 	*res = 0;
 	
 	if (head <= 8) {
 		n = head;
-	} else { // leading ones, fill n half bytes in res
+	} else { // we have n leading ones, fill n half bytes in res with 0xf
 		n = head - 8;
 		mask = 0xf0000000;
 		for (i=0; i<n; i++) {
