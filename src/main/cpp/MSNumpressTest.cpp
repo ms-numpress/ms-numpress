@@ -121,7 +121,7 @@ void decodeLinearNiceLowFP() {
   mzs[6] = 700.00010;
   
   size_t nMzs = 7;
-  unsigned char encoded[28];
+  unsigned char encoded[33]; // max length is 33 bytes
 
   // check for fixed points
   {
@@ -158,15 +158,15 @@ void decodeLinearNiceLowFP() {
     assert(abs(400.00010 - decoded[3]) < 0.001);
   }
   
-  double mz_err[7];
-  double encodedLength[7];
+  double mz_err[5];
+  double encodedLength[5];
 
   // for higher accuracy, we get longer encoded lengths
   mz_err[0] = 0.1;  encodedLength[0] = 22;
   mz_err[1] = 1e-3; encodedLength[1] = 25;
   mz_err[2] = 1e-5; encodedLength[2] = 29;
   mz_err[3] = 1e-6; encodedLength[3] = 30;
-  mz_err[3] = 1e-7; encodedLength[3] = 31;
+  mz_err[4] = 1e-7; encodedLength[4] = 31;
 
   for (int k = 0; k < 4; k++)
   {
