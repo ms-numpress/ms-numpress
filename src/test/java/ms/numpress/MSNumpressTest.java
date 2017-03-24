@@ -100,7 +100,6 @@ public class MSNumpressTest {
 	}
 
 
-
 	@Test
 	public void encodeDecodeFixedPoint() {
 		double fp = 300.21941382293625;
@@ -110,6 +109,28 @@ public class MSNumpressTest {
 		assertEquals(fp, decoded, 0);
 	}
 
+
+	@Test
+	public void computeLinearFixedPointAtPPM() {
+		double[] mzs = {100.0, 200.0, 300.00005, 400.00010, 450.00010, 455.00010, 700.00010};
+
+		double fp;
+		fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, 0.1 );
+		assertEquals( 5, fp, 0.000005 );
+
+		fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, 1e-3 );
+		assertEquals( 500, fp, 0.000005 );
+
+		fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, 1e-5 );
+		assertEquals( 50000, fp, 0.000005 );
+
+		fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, 1e-7 );
+		assertEquals( 5000000, fp, 0.000005 );
+
+		// cannot fulfill accuracy of 1e-8
+		fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, 1e-8 );
+		assertEquals( -1.0, fp, 0 );
+	}
 
 
 	@Test
@@ -124,6 +145,35 @@ public class MSNumpressTest {
 		assertEquals(0x00, 0xff & encoded[11]);
 		assertEquals(0x75, 0xff & encoded[16]);
 		assertEquals(0x80, 0xf0 & encoded[17]);
+	}
+
+
+	@Test
+	public void encodeLinearWithFixedPointAtPPM() {
+		double[] mzs 			= {100.0, 200.0, 300.00005, 400.00010, 450.00010, 455.00010, 700.00010};
+		byte[] buffer 			= new byte[100];
+		double[] decodeBuffer 	= new double[100];
+
+		double[] mzErrs 		= {0.1, 1e-3, 1e-5, 1e-6, 1e-7};
+		int[] expectedLengths 	= {22,  25,   29,   30,   31};
+
+		for ( int i = 0; i < mzErrs.length; i++ )
+		{
+			double mzErr = mzErrs[i];
+			int expectedLength = expectedLengths[i];
+
+			double fp = MSNumpress.optimalLinearFixedPointMass( mzs, mzs.length, mzErr );
+			int encodedLength = MSNumpress.encodeLinear( mzs, mzs.length, buffer, fp );
+			int decodedLength = MSNumpress.decodeLinear( buffer, encodedLength, decodeBuffer );
+
+			assertEquals( expectedLength, encodedLength );
+			assertEquals( mzs.length, decodedLength );
+
+			for ( int j = 0; j < mzs.length; j++ )
+			{
+				assertEquals( mzs[j], decodeBuffer[j], mzErr );
+			}
+		}
 	}
 	
 	
