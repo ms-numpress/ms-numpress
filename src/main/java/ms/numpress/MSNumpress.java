@@ -182,16 +182,23 @@ public class MSNumpress {
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////
-	
-	
+
+	/**
+	 * Compute the maximal linear fixed point that prevents integer overflow.
+	 *
+	 * @data		array of doubles to be encoded
+	 * @dataSize	number of doubles from data to encode
+	 *
+	 * @return		the largest linear fixed point safe to use
+	 */
 	public static double optimalLinearFixedPoint(
-		double[] data,
-		int dataSize
+			double[] data,
+			int dataSize
 	) {
 		if (dataSize == 0) return 0;
 		if (dataSize == 1) return Math.floor(0xFFFFFFFFl / data[0]);
 		double maxDouble = Math.max(data[0], data[1]);
-		
+
 		for (int i=2; i<dataSize; i++) {
 			double extrapol = data[i-1] + (data[i-1] - data[i-2]);
 			double diff 	= data[i] - extrapol;
@@ -199,6 +206,44 @@ public class MSNumpress {
 		}
 
 		return Math.floor(0x7FFFFFFFl / maxDouble);
+	}
+
+
+	/**
+	 * Compute the linear fixed point the results in a minimal encoded size while guaranteeing a
+	 * specified m/z accuracy.
+	 *
+	 * @note If the desired accuracy cannot be reached without overflowing 64
+	 * bit integers, then a negative value is returned. You need to check for
+	 * this and in that case abandon numpress or use optimalLinearFixedPoint
+	 * which returns the largest safe value.
+	 *
+	 * @data		array of doubles to be encoded
+	 * @dataSize	number of doubles from data to encode
+	 * @mass_acc	desired m/z accuracy in Th
+	 *
+	 * @return		the linear fixed point that satisfies the accuracy requirement (or -1 in case of failure).
+	 */
+
+	public static double optimalLinearFixedPointMass(
+			double[] data,
+			int dataSize,
+			double massAccuracy
+	) {
+		if (dataSize < 3) return 0;
+
+		// We calculate the maximal fixedPoint we need to achieve a specific mass
+		// accuracy. Note that the maximal error we will make by encoding as int is
+		// 0.5 due to rounding errors.
+		double maxFp = 0.5 / massAccuracy;
+
+		// There is a maximal value for the FP given by the int length (32bit)
+		// which means we cannot choose a value higher than that. In case we cannot
+		// achieve the desired accuracy, return failure (-1).
+		double maxFpOverflow = optimalLinearFixedPoint(data, dataSize);
+		if (maxFp > maxFpOverflow) return -1;
+
+		return maxFp;
 	}
 
 
