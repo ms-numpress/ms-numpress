@@ -20,6 +20,7 @@
 #include <iostream>
 #include <cmath>
 #include <climits>
+#include <algorithm>
 #include "MSNumpress.hpp"
 
 namespace ms {
