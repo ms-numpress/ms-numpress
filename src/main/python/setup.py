@@ -30,8 +30,7 @@ $ nosetests test_pymsnumpress.py
 """
 
 import os, shutil
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import setup, Extension
 from Cython.Distutils import build_ext
 
 # copy C++ files
@@ -48,5 +47,10 @@ ext_modules = [Extension("PyMSNumpress",
 setup(
     ext_modules = ext_modules,
     cmdclass = {'build_ext': build_ext},
+
+    name="PyMSNumpress",
+
+    version="0.2.1"
+
 )
 
