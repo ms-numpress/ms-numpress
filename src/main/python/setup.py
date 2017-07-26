@@ -34,10 +34,13 @@ from setuptools import setup, Extension
 from Cython.Distutils import build_ext
 
 # copy C++ files
-numpress_file = os.path.join( "..", "cpp", "MSNumpress.cpp")
-shutil.copy(numpress_file, ".")
-numpress_file = os.path.join( "..", "cpp", "MSNumpress.hpp")
-shutil.copy(numpress_file, ".")
+try:
+    numpress_file = os.path.join( "..", "cpp", "MSNumpress.cpp")
+    shutil.copy(numpress_file, ".")
+    numpress_file = os.path.join( "..", "cpp", "MSNumpress.hpp")
+    shutil.copy(numpress_file, ".")
+except IOError:
+    pass
 
 ext_modules = [Extension("PyMSNumpress",
                      ["PyMSNumpress.pyx", "MSNumpress.cpp"],
@@ -50,7 +53,7 @@ setup(
 
     name="PyMSNumpress",
 
-    version="0.2.1"
+    version="0.2.3"
 
 )
 
