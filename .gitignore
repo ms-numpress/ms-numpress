@@ -4,3 +4,6 @@
 *.user
 
 **/packages/*
+
+**/obj
+**/bin
