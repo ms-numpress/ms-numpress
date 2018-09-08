@@ -3,7 +3,9 @@
 **/Release/*.cache
 *.user
 
-**/packages/*
+**/packages
+**/testrunner
+**/TestResult.xml
 
 **/obj
 **/bin

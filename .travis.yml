@@ -4,10 +4,10 @@ before_install:
   - cd src/main/csharp
 install:
   - nuget restore MSNumpress.sln
-  - nuget install NUnit.Runners -Version 3.9.0 -OutputDirectory testrunner
+  - nuget install NUnit.ConsoleRunner -Version 3.9.0 -OutputDirectory testrunner
 script:
   - xbuild /p:Configuration=Release MSNumpress.sln
-  - mono ./testrunner/NUnit.Runners.3.9.0/tools/nunit-console.exe ./MSNumpress.Test/bin/Release/MSNumpress.Test.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe ./MSNumpress.Test/bin/Release/MSNumpress.Test.dll
 deploy:
   skip_cleanup: true
   provider: script
