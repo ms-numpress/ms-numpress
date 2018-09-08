@@ -1,0 +1,4 @@
+﻿**/.vs
+**/Debug/*.cache
+**/Release/*.cache
+*.user
