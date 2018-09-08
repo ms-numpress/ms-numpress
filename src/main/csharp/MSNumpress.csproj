@@ -39,9 +39,6 @@
   <ItemGroup>
     <Compile Include="MSNumpress.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include=".travis.yml" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
