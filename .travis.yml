@@ -1,8 +1,12 @@
 ﻿language: csharp
 solution: MSNumpress.sln
+before_install:
+  - cd src/main/csharp
 install:
   - nuget restore MSNumpress.sln
   - nuget install NUnit.Runners -Version 3.9.0 -OutputDirectory testrunner
+before_script:
+  - cd src/main/csharp
 script:
   - xbuild /p:Configuration=Release MSNumpress.sln
   - mono ./testrunner/NUnit.Runners.3.9.0/tools/nunit-console.exe ./MSNumpress.Test/bin/Release/MSNumpress.Test.dll
