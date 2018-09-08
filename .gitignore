@@ -2,3 +2,5 @@
 **/Debug/*.cache
 **/Release/*.cache
 *.user
+
+**/packages/*

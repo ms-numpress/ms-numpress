@@ -24,13 +24,13 @@
  */
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using NUnit.Framework;
 
-[TestClass]
+[TestFixture]
 public class MSNumpressTest
 {
-    [TestMethod]
+    [Test]
     public void encodeInt()
     {
         byte[] res = new byte[10];
@@ -63,7 +63,7 @@ public class MSNumpressTest
         Assert.AreEqual(0x1, res[8] & 0xf);
     }
 
-    [TestMethod]
+    [Test]
     public void decodeInt()
     {
         byte[] res = new byte[10];
@@ -90,7 +90,7 @@ public class MSNumpressTest
         Assert.AreEqual(370000000L, l);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeFixedPoint()
     {
         byte[] encoded = new byte[8];
@@ -105,7 +105,7 @@ public class MSNumpressTest
         Assert.AreEqual(0x0, 0xff & encoded[7]);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeFixedPoint()
     {
         double fp = 300.21941382293625;
@@ -115,7 +115,7 @@ public class MSNumpressTest
         Assert.AreEqual(fp, decoded, 0);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeLinear()
     {
         double[] mzs = { 100.0, 200.0, 300.00005, 400.00010 };
@@ -130,7 +130,7 @@ public class MSNumpressTest
         Assert.AreEqual(0x80, 0xf0 & encoded[17]);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeLinearEmpty()
     {
         byte[] encoded = new byte[8];
@@ -140,7 +140,7 @@ public class MSNumpressTest
         Assert.AreEqual(0, decodedBytes);
     }
 
-    [TestMethod]
+    [Test]
     public void decodeLinearNice()
     {
         double[] mzs = { 100.0, 200.0, 300.00005, 400.00010 };
@@ -155,7 +155,7 @@ public class MSNumpressTest
         Assert.AreEqual(400.00010, decoded[3], 0.000005);
     }
 
-    [TestMethod]
+    [Test]
     public void decodeLinearWierd()
     {
         double[] mzs = { 100.0, 200.0, 4000.00005, 0.00010 };
@@ -170,7 +170,7 @@ public class MSNumpressTest
         Assert.AreEqual(0.00010, decoded[3], 0.000005);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeLinear()
     {
         Random random = new Random();
@@ -194,7 +194,7 @@ public class MSNumpressTest
             Assert.AreEqual(mzs[i], decoded[i], 0.000005);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodePic()
     {
         Random random = new Random();
@@ -214,7 +214,7 @@ public class MSNumpressTest
             Assert.AreEqual(ics[i], decoded[i], 0.5);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeSlof()
     {
         Random random = new Random();
@@ -235,7 +235,7 @@ public class MSNumpressTest
             Assert.AreEqual(0.0, (ics[i] - decoded[i]) / ((ics[i] + decoded[i]) / 2), 0.0005);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeLinear5()
     {
         Random random = new Random();
@@ -268,7 +268,7 @@ public class MSNumpressTest
             Assert.AreEqual(firstDecoded[i], decoded[i], double.Epsilon);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodePic5()
     {
         Random random = new Random();
@@ -299,7 +299,7 @@ public class MSNumpressTest
             Assert.AreEqual(firstDecoded[i], decoded[i], double.Epsilon);
     }
 
-    [TestMethod]
+    [Test]
     public void encodeDecodeSlof5()
     {
         Random random = new Random();
