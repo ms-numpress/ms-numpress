@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MSNumpress.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Max-Plank Institute of Biochemistry")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MSNumpress.Test")]
-[assembly: AssemblyCopyright("Copyright © Max-Plank Institute of Biochemistry 2018")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
