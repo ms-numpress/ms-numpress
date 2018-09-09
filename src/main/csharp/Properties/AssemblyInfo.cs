@@ -28,6 +28,8 @@ using System.Runtime.InteropServices;
 //      Minor Version 
 //      Build Number
 //      Revision
-//
-[assembly: AssemblyVersion("0.2.3.*")]
-[assembly: AssemblyFileVersion("0.2.3.*")]
+
+// Version numbers are updated by the CI system using the patch_assembly_info.sh script
+[assembly: AssemblyVersion("0.0.0.0")]
+[assembly: AssemblyFileVersion("0.0.0.0")]
+[assembly: AssemblyInformationalVersion("0.0.0.0")]

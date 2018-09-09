@@ -2,11 +2,12 @@
 solution: MSNumpress.sln
 before_install:
   - cd src/main/csharp
+  - chmod +x patch_assembly_info.sh && ./patch_assembly_info.sh
 install:
   - nuget restore MSNumpress.sln
   - nuget install NUnit.ConsoleRunner -Version 3.9.0 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=Release MSNumpress.sln
+  - msbuild /p:Configuration=Release MSNumpress.sln
   - mono ./testrunner/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe ./MSNumpress.Test/bin/Release/MSNumpress.Test.dll
 deploy:
   skip_cleanup: true
