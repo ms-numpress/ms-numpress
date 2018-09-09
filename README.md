@@ -31,7 +31,7 @@ move to `src/main/python` and compile and run tests (on LINUX) with
 	python setup.py build_ext --inplace 
 	nosetests test_pymsnumpress.py  
 
-### C# library tests [![Build Status](https://travis-ci.org/jdrudolph/ms-numpress.svg?branch=master)](https://travis-ci.org/jdrudolph/ms-numpress)
+### C# library tests [![Build Status](https://travis-ci.org/jdrudolph/ms-numpress.svg?branch=master)](https://travis-ci.org/jdrudolph/ms-numpress) [![NuGet Badge](https://buildstats.info/nuget/MSNumpress)](https://www.nuget.org/packages/MSNumpress/)
 
 Open the `MSNumpress.sln` solution in Visual Studio. First run 'Restore NuGet Packages'. Now you can 'Run Unit Tests'.
 
