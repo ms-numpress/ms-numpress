@@ -332,5 +332,16 @@ namespace MSNumpress.Test
 			for (int i = 0; i < n; i++)
 				Assert.AreEqual(firstDecoded[i], decoded[i], double.Epsilon);
 		}
+
+		[Test]
+		public void DecodeShotPicManuallyAndAutomatically()
+		{
+			var bytes = new byte[] { 106, 40, 134, 162 };
+			var manual = new double[4];
+			var numberOfDoubles = MSNumpress.decodePic(bytes, bytes.Length, manual);
+			Assert.AreEqual(4, numberOfDoubles);
+			var automatic = MSNumpress.decode(MSNumpress.ACC_NUMPRESS_PIC, bytes, bytes.Length);
+			CollectionAssert.AreEqual(manual, automatic);
+		}
 	}
 }

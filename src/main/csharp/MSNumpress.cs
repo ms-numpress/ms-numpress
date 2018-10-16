@@ -98,9 +98,6 @@ namespace MSNumpress
 
 			if (cvAccession == ACC_NUMPRESS_PIC)
 			{
-				if (dataSize < 8 || data.Length < 8)
-					throw new ArgumentException("Cannot decode numPic data, need at least 8 initial bytes for fixed point.");
-
 				double[] buffer = new double[dataSize * 2];
 				int nbrOfDoubles = MSNumpress.decodePic(data, dataSize, buffer);
 				if (nbrOfDoubles < 0)
@@ -109,7 +106,6 @@ namespace MSNumpress
 				double[] result = new double[nbrOfDoubles];
 				Array.Copy(buffer, 0, result, 0, nbrOfDoubles);
 				return result;
-
 			}
 
 			throw new ArgumentException("'" + cvAccession + "' is not a numpress compression term");
