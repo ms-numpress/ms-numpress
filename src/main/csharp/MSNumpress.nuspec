@@ -7,7 +7,7 @@
     <licenseUrl>https://github.com/ms-numpress/ms-numpress#license</licenseUrl>
     <projectUrl>https://github.com/ms-numpress/ms-numpress</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>Implementations of compression schemes for numeric data from mass spectrometers. Inofficial nuget package</description>
     <tags>ms-numpress compression proteomics mzml bioinformatics</tags>
   </metadata>
 </package>
