@@ -8,8 +8,9 @@ The library provides implementations of 3 different algorithms,
 time or M/Z arrays, and 2 for compressing non smooth data with
 lower requirements on precision like ion count arrays.
 
-Implementations and unit test are provided in C++, Java, and C#: for Python
-bindings exist.
+Native implementations and unit test are provided in C++, Java, and C#. We provide Python bindings through [PyMSNumpress](https://pypi.org/project/PyMSNumpress/) which can be installed as follows:
+
+	pip install PyMSNumpress
 
 ### C++ library tests
 
