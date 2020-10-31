@@ -1,10 +1,11 @@
 Package: RMSNumpress
 Type: Package
-Title: Rcpp bindings to native C++ implementation of MS Numpress
+Title: Rcpp Bindings to native C++ implementation of MS Numpress
 Version: 1.0
 Date: 2020-10-31
-Authors@R: c(person("Justin", "Sing", email = "justincsing@gmail.com", role = c("cre", "aut")), person("Johan", "Teleman", email = "johan.teleman@immun.lth.se", role = "aut"))
-Maintainer: Justin <justincsing@gmail.com>
+Authors@R: c(person("Justin", "Sing", email = "justincsing@gmail.com", role = c("cre","aut")), 
+  person("Johan", "Teleman", email = "johan.teleman@immun.lth.se", role = "aut"))
+Maintainer: Justin Sing <justincsing@gmail.com>
 Description: Rcpp bindings to the native C++ implementation of MS Numpress, that provides two compression schemes for numeric data from mass spectrometers. The library provides implementations of 3 different algorithms, 1 designed to compress first order smooth data like retention time or M/Z arrays, and 2 for compressing non smooth data with lower requirements on precision like ion count arrays..
 License: BSD_3_clause + file LICENSE
 Imports: Rcpp (>= 1.0.3)

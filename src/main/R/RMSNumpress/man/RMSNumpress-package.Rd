@@ -116,7 +116,13 @@ Maintainer: Justin Sing <justincsing@gmail.com>
     
     # Decode Numpress Linear
     ## Retention time data that is encoded with encodeLinear and is zlib compressed
-    rt_blob <- as.raw(as.hexmode(c("78", "9c", "73", "50", "61", "00", "83", "aa", "15", "0c", "0c", "73", "80", "b8", "a3", "5d", "fe", "47", "07", "84", "28", "fc", "8f", "c4", "40", "e5", "61", "51", "84", "a9", "85", "08", "e1", "06", "00", "06", "be", "41", "cf")))
+    ### NOTE: For the sake of this example, I have broken the raw vector into several parts
+    ###       to avoid Rd line widths (>100 characters) issues with CRAN build checks.
+    rt_raw1 <- c("78", "9c", "73", "50", "61", "00", "83", "aa", "15", "0c", "0c", "73", "80")
+    rt_raw2 <- c("b8", "a3", "5d", "fe", "47", "07", "84", "28", "fc", "8f", "c4", "40", "e5")
+    rt_raw3 <- c("61", "51", "84", "a9", "85", "08", "e1", "06", "00", "06", "be", "41", "cf")
+    ## Add all character representation of raw data back together and convert back to hex raw vector
+    rt_blob <- as.raw(as.hexmode(c(rt_raw1, rt_raw2, rt_raw3 )))
     ## Decompress blob
     rt_blob_uncompressed <- as.raw(Rcompression::uncompress( rt_blob, asText = FALSE ))
     ## Decode to rentention time double values

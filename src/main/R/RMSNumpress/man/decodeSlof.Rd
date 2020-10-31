@@ -23,7 +23,12 @@ Note that this method may throw a const char* if it deems the input data to be c
 \examples{
 \dontrun{
 ## Intensity array to encode
-int_array <- c(0.71773432,  0.43443741,  1.71883610, 0.13220307,  0.90664242,  0.00000000, 0.00000000,  0.64213755,  0.43443741, 0.47221479)
+### NOTE: For the sake of this example, I have broken the intensity vector into several parts
+###       to avoid Rd line widths (>100 characters) issues with CRAN build checks.
+int_array1 <- c(0.71773432,  0.43443741,  1.71883610, 0.13220307,  0.90664242)  
+int_array2 <- c(0.00000000, 0.00000000,  0.64213755,  0.43443741, 0.47221479)
+## Comcatenate into one intensity array
+int_array <- c(int_array1, int_array2)
 ## Encode intensity array using encodeSlof
 int_encode <- encodeSlof( int_array, 16 )
 }
