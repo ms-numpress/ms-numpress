@@ -1,9 +1,9 @@
 Package: RMSNumpress
 Type: Package
-Title: Rcpp Bindings to native C++ implementation of MS Numpress
+Title: Rcpp Bindings To Native C++ Implementation Of MS Numpress
 Version: 1.0
 Date: 2020-10-31
-Author: "Justin Sing <justincsing@gmail.com> [cre, aut]"
+Author: Justin Sing <justincsing@gmail.com> [cre, aut]
 Authors@R: c(person("Justin", "Sing", email = "justincsing@gmail.com", role = c("cre","aut")), 
   person("Johan", "Teleman", email = "johan.teleman@immun.lth.se", role = "aut"))
 Maintainer: Justin Sing <justincsing@gmail.com>
