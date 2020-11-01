@@ -5,7 +5,7 @@ Version: 1.0
 Date: 2020-10-31
 Authors@R: c(person("Justin", "Sing", email = "justincsing@gmail.com", role = c("cre","aut")), 
   person("Johan", "Teleman", email = "johan.teleman@immun.lth.se", role = "aut"))
-Description: 'Rcpp' bindings to the native C++ implementation of MS Numpress, that provides two compression schemes for numeric data from mass spectrometers. The library provides implementations of 3 different algorithms, 1 designed to compress first order smooth data like retention time or M/Z arrays, and 2 for compressing non smooth data with lower requirements on precision like ion count arrays. (Teleman et al., 2014 <doi: 10.1074/mcp.O114.037879>)
+Description: 'Rcpp' bindings to the native C++ implementation of MS Numpress, that provides two compression schemes for numeric data from mass spectrometers. The library provides implementations of 3 different algorithms, 1 designed to compress first order smooth data like retention time or M/Z arrays, and 2 for compressing non smooth data with lower requirements on precision like ion count arrays. Refer to the publication (Teleman et al., 2014 <doi: 10.1074/mcp.O114.037879>) for more details.
 License: BSD_3_clause + file LICENSE
 Imports: Rcpp (>= 1.0.3)
 LinkingTo: Rcpp
