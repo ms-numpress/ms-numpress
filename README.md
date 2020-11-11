@@ -12,6 +12,11 @@ Native implementations and unit test are provided in C++, Java, and C#. We provi
 
 	pip install PyMSNumpress
 
+We provide R bindings through [RMSNumpress](https://CRAN.R-project.org/package=RMSNumpress) which can be installed as follows:
+```
+install.packages("RMSNumpress")
+```
+
 ### C++ library tests
 
 For C++, move to `src/main/cpp` and compile and run tests (on LINUX) with
@@ -41,6 +46,14 @@ move to `src\main\csharp` and compile\run tests (on WINDOWS) with
 	MSTest /testcontainer:MSNumpress.dll
 
 NOTE: The example above is for Visual Studio Community 2015 (v14.0). If you use a different version, your path to the unit test reference DLL will be slightly different.
+
+### R library tests
+
+Ensure that `Rcpp` and `devtools` is installed. Then move to `src/main/R/RMSNumpress/` and compile and run tests (on LINUX) with
+
+```
+R -e "Rcpp::compileAttributes(); devtools::test()"
+```
 
 Numpress Pic
 ------------
