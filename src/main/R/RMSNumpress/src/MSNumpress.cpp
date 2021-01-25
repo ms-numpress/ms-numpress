@@ -711,20 +711,32 @@ size_t encodeSlof(
 	double temp;
 	unsigned short x;
 	encodeFixedPoint(fixedPoint, result);
+	
+	//cout << "#715: fixedPoint: " << fixedPoint << endl;
 
 	ri = 8;
 	for (i=0; i<dataSize; i++) {
 		temp = log(data[i]+1) * fixedPoint;
-
+	  //cout << "#720: data[i]+1: " << data[i]+1 << " temp: " << temp << endl;
+	  if ( round(temp) == USHRT_MAX ){
+	    cout << "[MSNumpress::encodeSlof] Warning!! issue with data point: " << data[i] << ", log(data[i]+1) * fixedPoint ~= USHRT_MAX." << endl;
+	    cout << "[MSNumpress::encodeSlof] Warning!! Will subtract 1e-10 from fixedPoint scaling factor." << endl;
+	    cout << std::setprecision(50) << "[MSNumpress::encodeSlof] Warning!! Changing fixedPoint from " << fixedPoint << " to " << fixedPoint - 1e-10 << endl;
+	    temp = log(data[i]+1) * (fixedPoint-1e-10);
+	  }
 		if (THROW_ON_OVERFLOW && 
 				temp > USHRT_MAX		) {
+		  //cout << "THROW_ON_OVERFLOW: " << THROW_ON_OVERFLOW << "USHRT_MAX" << USHRT_MAX << endl;
+		  cout << "[MSNumpress::encodeSlof] Cannot encode a number that overflows USHRT_MAX." << endl;
 			throw "[MSNumpress::encodeSlof] Cannot encode a number that overflows USHRT_MAX.";
 		}
 
 		x = static_cast<unsigned short>(temp + 0.5);
 		result[ri++] = x & 0xff;
 		result[ri++] = (x >> 8) & 0xff; 
+		//cout << " result[ri++]: " << result[ri++] << endl;
 	}
+	//cout << "ri: " << ri << endl;
 	return ri;
 }
 
