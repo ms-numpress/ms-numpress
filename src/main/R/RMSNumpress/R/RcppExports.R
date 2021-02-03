@@ -98,7 +98,7 @@ encodeLinear <- function(data, fixedPoint) {
 #' ## Add all character representation of raw data back together and convert back to hex raw vector
 #' rt_blob <- as.raw(as.hexmode(c(rt_raw1, rt_raw2, rt_raw3 )))
 #' ## Decompress blob
-#' rt_blob_uncompressed <- as.raw(Rcompression::uncompress( rt_blob, asText = FALSE ))
+#' rt_blob_uncompressed <- memDecompress(rt_blob, type = "gzip", asChar = FALSE)
 #' ## Decode to rentention time double values
 #' rt_array <- decodeLinear(rt_blob_uncompressed)
 #' }
