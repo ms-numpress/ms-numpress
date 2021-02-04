@@ -1,7 +1,7 @@
 Package: RMSNumpress
 Type: Package
 Title: 'Rcpp' Bindings to Native C++ Implementation of MS Numpress
-Version: 1.0
+Version: 1.0.1
 Date: 2020-10-31
 Authors@R: c(person("Justin", "Sing", email = "justincsing@gmail.com", role = c("cre","aut")), 
   person("Johan", "Teleman", email = "johan.teleman@immun.lth.se", role = "aut"))
