@@ -17,6 +17,19 @@ We provide R bindings through [RMSNumpress](https://CRAN.R-project.org/package=R
 install.packages("RMSNumpress")
 ```
 
+If you use R via Anaconda, it is appropriate to install `RMSNumpress` through **conda** using the **conda-forge** channel. The feedstock can be found [here](https://github.com/conda-forge/r-rmsnumpress-feedstock).
+
+First make sure you have the conda-forge channel
+```
+conda config --add channels conda-forge
+```
+
+Then you can install RMSNumpress via conda
+```
+conda install r-rmsnumpress
+```
+
+
 ### C++ library tests
 
 For C++, move to `src/main/cpp` and compile and run tests (on LINUX) with
