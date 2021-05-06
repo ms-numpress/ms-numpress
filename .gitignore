@@ -1,0 +1,13 @@
+﻿**/.vs
+**/Debug/*.cache
+**/Release/*.cache
+*.user
+
+**/packages
+**/testrunner
+**/TestResult.xml
+
+**/obj
+**/bin
+
+**/*.nupkg

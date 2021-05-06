@@ -50,15 +50,11 @@ move to `src/main/python` and compile and run tests (on LINUX) with
 	python setup.py build_ext --inplace 
 	nosetests test_pymsnumpress.py  
 
-### C# library tests
+### C# library tests [![Build Status](https://travis-ci.org/jdrudolph/ms-numpress.svg?branch=master)](https://travis-ci.org/jdrudolph/ms-numpress) [![NuGet Badge](https://buildstats.info/nuget/MSNumpress)](https://www.nuget.org/packages/MSNumpress/)
 
-Ensure that a version of Visual Studio is installed on your system. Then open a Visual Studio Cross Tools Command Prompt, 
-move to `src\main\csharp` and compile\run tests (on WINDOWS) with
+Open the `MSNumpress.sln` solution in Visual Studio. First run 'Restore NuGet Packages'. Now you can 'Run Unit Tests'.
 
-	csc /target:library MSNumpress.cs MSNumpressTest.cs /reference:"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll"
-	MSTest /testcontainer:MSNumpress.dll
-
-NOTE: The example above is for Visual Studio Community 2015 (v14.0). If you use a different version, your path to the unit test reference DLL will be slightly different.
+Developers can use the library by directly installing it from 
 
 ### R library tests
 
